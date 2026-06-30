@@ -1,0 +1,837 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<title>Pilotage — Locks by Afro</title>
+<meta name="theme-color" content="#16130F">
+<link rel="manifest" href="manifest-admin.json">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
+<script src="config.js"></script>
+<style>
+:root{--red:#D81E2C;--red2:#b3151f;--ink:#16130F;--cream:#F6F1E8;--card:#ffffff;--line:#ece4d6;--muted:#8a8276;--ok:#1d8a4e;--amber:#b9821a;--blue:#2563a8;--gray:#6b6b6b}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;background:var(--cream);color:var(--ink);font-size:15px;line-height:1.45}
+#app{max-width:560px;margin:0 auto;min-height:100vh;background:var(--cream);position:relative;padding-bottom:40px}
+.bar{position:sticky;top:0;z-index:20;background:var(--ink);color:#fff;display:flex;align-items:center;gap:10px;padding:14px 16px;padding-top:max(14px,env(safe-area-inset-top))}
+.bar .lg{font-weight:800;letter-spacing:.3px}
+.bar .lg small{display:block;font-weight:500;font-size:11px;opacity:.6;letter-spacing:1px;text-transform:uppercase}
+.bar .sp{flex:1}
+.bar button{background:rgba(255,255,255,.12);color:#fff;border:0;border-radius:10px;padding:8px 12px;font-size:13px;font-weight:600}
+.tabs{position:sticky;top:54px;z-index:15;display:flex;gap:7px;overflow-x:auto;padding:10px 12px;background:var(--cream);border-bottom:1px solid var(--line);scrollbar-width:none}
+.tabs::-webkit-scrollbar{display:none}
+.tabs button{flex:0 0 auto;background:#fff;border:1px solid var(--line);color:var(--ink);border-radius:999px;padding:8px 14px;font-size:13px;font-weight:600;white-space:nowrap}
+.tabs button.on{background:var(--red);border-color:var(--red);color:#fff}
+#view{padding:14px}
+h2{font-size:18px;margin:2px 0 12px}
+h3{font-size:15px;margin:0 0 8px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px;margin-bottom:12px;box-shadow:0 1px 2px rgba(0,0,0,.03)}
+.muted{color:var(--muted)}
+.row{display:flex;gap:10px;align-items:center}
+.between{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.kpi{background:#fff;border:1px solid var(--line);border-radius:16px;padding:14px}
+.kpi .n{font-size:26px;font-weight:800;line-height:1}
+.kpi .l{font-size:12px;color:var(--muted);margin-top:6px}
+label{display:block;font-size:12px;color:var(--muted);margin:10px 0 4px;font-weight:600}
+input,select,textarea{width:100%;border:1px solid var(--line);border-radius:11px;padding:11px 12px;font-size:15px;background:#fff;color:var(--ink);font-family:inherit}
+textarea{min-height:74px;resize:vertical}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;background:var(--red);color:#fff;border:0;border-radius:12px;padding:12px 16px;font-size:15px;font-weight:700;width:100%;cursor:pointer}
+.btn:active{transform:scale(.99)}
+.btn.sec{background:#fff;color:var(--ink);border:1px solid var(--line)}
+.btn.dark{background:var(--ink)}
+.btn.sm{padding:8px 12px;font-size:13px;width:auto}
+.btn.gho{background:transparent;color:var(--red);border:1px solid var(--red)}
+.btn.danger{background:#fff;color:var(--red);border:1px solid #f0c9cc}
+.list .it{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:12px 0;border-bottom:1px solid var(--line)}
+.list .it:last-child{border-bottom:0}
+.pill{display:inline-block;font-size:11px;font-weight:700;padding:3px 9px;border-radius:999px;white-space:nowrap}
+.pill.amber{background:#fdf2dc;color:var(--amber)}
+.pill.ok{background:#e2f4ea;color:var(--ok)}
+.pill.blue{background:#e4eef8;color:var(--blue)}
+.pill.red{background:#fde3e5;color:var(--red)}
+.pill.gray{background:#eee;color:var(--gray)}
+.tag{font-size:11px;color:var(--muted)}
+.sheet-bg{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:40;display:flex;align-items:flex-end;justify-content:center}
+.sheet{background:var(--cream);width:100%;max-width:560px;max-height:92vh;overflow:auto;border-radius:20px 20px 0 0;padding:16px;padding-bottom:max(20px,env(safe-area-inset-bottom))}
+.sheet .hd{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.sheet .x{background:#fff;border:1px solid var(--line);border-radius:10px;width:34px;height:34px;font-size:18px;line-height:1}
+.daysel{display:flex;gap:6px;flex-wrap:wrap}
+.daysel .d{flex:0 0 auto;border:1px solid var(--line);background:#fff;border-radius:10px;padding:8px 0;width:46px;text-align:center;font-size:13px;font-weight:600;cursor:pointer;user-select:none}
+.daysel .d.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+.kv{display:flex;justify-content:space-between;gap:10px;padding:7px 0;border-bottom:1px dashed var(--line);font-size:14px}
+.kv:last-child{border-bottom:0}
+.kv span{color:var(--muted)}
+.thumb{position:relative;border-radius:12px;overflow:hidden;border:1px solid var(--line);background:#fff}
+.thumb img{width:100%;height:110px;object-fit:cover;display:block}
+.thumb .del{position:absolute;top:6px;right:6px;background:rgba(0,0,0,.6);color:#fff;border:0;border-radius:8px;width:30px;height:30px;font-size:16px}
+.gal{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--ink);color:#fff;padding:11px 16px;border-radius:12px;font-size:14px;z-index:60;opacity:0;transition:opacity .2s;max-width:90%}
+.toast.show{opacity:1}
+.center{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px}
+.auth{background:#fff;border:1px solid var(--line);border-radius:20px;padding:24px;max-width:380px;width:100%;text-align:center}
+.auth .logo{width:64px;height:64px;border-radius:18px;background:var(--ink);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:22px;margin:0 auto 14px}
+.auth h1{font-size:20px;margin:0 0 4px}
+.auth p{color:var(--muted);font-size:13px;margin:0 0 18px}
+.err{color:var(--red);font-size:13px;margin-top:10px;min-height:16px}
+.spin{display:inline-block;width:18px;height:18px;border:2px solid rgba(255,255,255,.4);border-top-color:#fff;border-radius:50%;animation:sp .7s linear infinite;vertical-align:-3px}
+@keyframes sp{to{transform:rotate(360deg)}}
+.pininput{letter-spacing:8px;text-align:center;font-size:22px;font-weight:700}
+/* ===== Refonte « wallet » — rouge/noir Locks ===== */
+#view{padding-bottom:104px}
+.topbar{position:sticky;top:0;z-index:20;background:linear-gradient(135deg,#16130F 0%,#2a1113 52%,#7a1620 100%);color:#fff;display:flex;align-items:center;justify-content:space-between;gap:10px;padding:16px;padding-top:max(16px,env(safe-area-inset-top));border-radius:0 0 24px 24px}
+.topbar .who{display:flex;align-items:center;gap:12px;min-width:0}
+.topbar .ava{width:42px;height:42px;border-radius:14px;background:rgba(255,255,255,.14);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:14px;letter-spacing:.5px;flex:0 0 auto}
+.topbar .hi{font-size:10.5px;letter-spacing:1.6px;text-transform:uppercase;opacity:.6;line-height:1}
+.topbar .hello{font-size:17px;font-weight:800;line-height:1.2;margin-top:2px}
+.topbar .trow{display:flex;gap:8px;flex:0 0 auto}
+.topbar .ic{background:rgba(255,255,255,.12);color:#fff;border:0;border-radius:12px;width:40px;height:40px;display:flex;align-items:center;justify-content:center;padding:0}
+.topbar .ic svg{width:19px;height:19px}
+.hero{background:linear-gradient(140deg,#1b1712 0%,#3a141a 50%,#9a1a26 100%);color:#fff;border-radius:24px;padding:20px;margin-bottom:14px;box-shadow:0 12px 26px -14px rgba(154,26,38,.55)}
+.hero .lab{font-size:11.5px;letter-spacing:1.2px;text-transform:uppercase;opacity:.72;text-align:center}
+.hero .amt{font-size:34px;font-weight:800;text-align:center;margin:5px 0 3px;letter-spacing:.4px}
+.hero .sub{font-size:12.5px;text-align:center;opacity:.82;margin-bottom:15px}
+.hero .hbtns{display:flex;gap:10px}
+.hero .hbtns button{flex:1;background:#fff;color:#16130F;border:0;border-radius:14px;padding:12px;font-size:14px;font-weight:700}
+.hero .hbtns button.alt{background:rgba(255,255,255,.15);color:#fff}
+.circles{display:flex;justify-content:space-between;gap:6px;margin-bottom:14px}
+.circles .c{flex:1;background:transparent;border:0;display:flex;flex-direction:column;align-items:center;gap:7px;cursor:pointer}
+.circles .c .ico{width:54px;height:54px;border-radius:50%;background:#fff;border:1px solid var(--line);display:flex;align-items:center;justify-content:center;box-shadow:0 2px 7px rgba(0,0,0,.05)}
+.circles .c .ico svg{width:22px;height:22px}
+.circles .c .lbl{font-size:11.5px;font-weight:600;color:var(--ink)}
+.circles .c:nth-child(1) .ico{color:var(--red)}
+.circles .c:nth-child(2) .ico{color:#1d8a4e}
+.circles .c:nth-child(3) .ico{color:#2563a8}
+.circles .c:nth-child(4) .ico{color:#b9821a}
+.bnav{position:fixed;left:50%;transform:translateX(-50%);bottom:max(14px,env(safe-area-inset-bottom));width:min(540px,calc(100% - 24px));background:#16130F;border-radius:24px;display:flex;align-items:center;justify-content:space-around;padding:9px 8px;z-index:30;box-shadow:0 14px 32px -10px rgba(0,0,0,.5)}
+.bnav button{background:transparent;border:0;color:rgba(255,255,255,.5);display:flex;flex-direction:column;align-items:center;gap:3px;font-size:10px;font-weight:600;padding:4px 4px;flex:1}
+.bnav button svg{width:21px;height:21px}
+.bnav button.on{color:#fff}
+.bnav button.ctr{flex:0 0 auto;gap:0}
+.bnav button.ctr .bi{width:56px;height:56px;border-radius:50%;background:var(--red);display:flex;align-items:center;justify-content:center;margin-top:-24px;border:4px solid var(--cream);box-shadow:0 8px 18px -4px rgba(216,30,44,.6)}
+.bnav button.ctr .bi svg{width:25px;height:25px;color:#fff}
+.bnav button.ctr.on .bi{background:var(--red2)}
+.morelist{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.moreit{background:#fff;border:1px solid var(--line);border-radius:14px;padding:16px 12px;font-size:14px;font-weight:600;color:var(--ink);text-align:left}
+@media(min-width:640px){
+  #app{max-width:600px}
+  .circles .c .ico{width:58px;height:58px}
+}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<div id="toast" class="toast"></div>
+<script>
+const _CFG=window.LBA_CONFIG||{};const _SUPA=((_CFG.SUPABASE_URL)||"https://gnbpaytmhigbbnijovlg.supabase.co").replace(/\/+$/,"");const FN=_SUPA+"/functions/v1/admin";
+const ANON=(_CFG.SUPABASE_ANON_KEY)||"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImduYnBheXRtaGlnYmJuaWpvdmxnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE3MDM0MjEsImV4cCI6MjA5NzI3OTQyMX0.kmBbASuLU5ak9LQksZ8nBffty46J58VuyQgqs4iMGKo";
+let TOKEN=localStorage.getItem("lba_admin")||"";
+if('serviceWorker' in navigator){window.addEventListener('load',function(){navigator.serviceWorker.register('sw.js').catch(function(){});});}
+let DATA={};
+let TAB="dash";
+
+const app=document.getElementById("app");
+const $=(id)=>document.getElementById(id);
+const esc=(s)=>String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const euro=(c)=>((+c||0)/100).toLocaleString("fr-FR",{minimumFractionDigits:0,maximumFractionDigits:2})+" €";
+const DAYS=["Dim","Lun","Mar","Mer","Jeu","Ven","Sam"];
+function dt(iso){if(!iso)return"";try{return new Date(iso).toLocaleString("fr-FR",{weekday:"short",day:"2-digit",month:"short",hour:"2-digit",minute:"2-digit"})}catch{return iso}}
+function dshort(iso){if(!iso)return"";try{return new Date(iso).toLocaleDateString("fr-FR",{day:"2-digit",month:"short",year:"numeric"})}catch{return iso}}
+let _tt;
+function toast(m){const t=$("toast");t.textContent=m;t.classList.add("show");clearTimeout(_tt);_tt=setTimeout(()=>t.classList.remove("show"),2200)}
+
+async function api(action,payload={}){
+  const r=await fetch(FN,{method:"POST",headers:{"Content-Type":"application/json","apikey":ANON,"Authorization":"Bearer "+(TOKEN||ANON)},body:JSON.stringify(Object.assign({action,token:TOKEN||undefined},payload))});
+  let j={};try{j=await r.json()}catch{}
+  if(r.status===401){TOKEN="";localStorage.removeItem("lba_admin");authScreen(j.error||"Session expirée.");throw new Error("auth")}
+  if(!r.ok)throw new Error(j.error||("Erreur "+r.status));
+  return j;
+}
+
+/* ============== AUTH ============== */
+async function boot(){
+  if(TOKEN){try{await loadDash();return}catch(e){if(e.message==="auth")return}}
+  let setup=false;
+  try{const j=await api("need_setup");setup=!!j.setup}catch(e){authScreen("Connexion au serveur impossible.");return}
+  authScreen(null,setup);
+}
+
+function authScreen(msg,setup){
+  app.innerHTML=`<div class="center"><div class="auth">
+    <div class="logo">LBA</div>
+    <h1>${setup?"Créer le code admin":"Pilotage"}</h1>
+    <p>${setup?"Choisis un code à 4 à 8 chiffres. À mémoriser : il protège l'accès au dashboard.":"Locks by Afro — espace gérant"}</p>
+    <input id="pin" class="pininput" type="password" inputmode="numeric" maxlength="8" placeholder="••••" autocomplete="off">
+    ${setup?'<input id="pin2" class="pininput" style="margin-top:10px" type="password" inputmode="numeric" maxlength="8" placeholder="confirmer" autocomplete="off">':""}
+    <div style="margin-top:14px"><button id="go" class="btn">${setup?"Créer le code":"Entrer"}</button></div>
+    <div class="err" id="err">${msg?esc(msg):""}</div>
+  </div></div>`;
+  const pin=$("pin");pin.focus();
+  const submit=async()=>{
+    const v=pin.value.trim();
+    if(!/^\d{4,8}$/.test(v)){$("err").textContent="Code à 4 à 8 chiffres.";return}
+    if(setup){const v2=$("pin2").value.trim();if(v!==v2){$("err").textContent="Les deux codes ne correspondent pas.";return}}
+    const b=$("go");b.disabled=true;b.innerHTML='<span class="spin"></span>';
+    try{
+      const j=await api(setup?"set_pin":"login",{pin:v});
+      if(j.token){TOKEN=j.token;localStorage.setItem("lba_admin",TOKEN);await loadDash()}
+      else{$("err").textContent=j.error||"Erreur.";b.disabled=false;b.textContent=setup?"Créer le code":"Entrer"}
+    }catch(e){$("err").textContent=e.message||"Erreur.";b.disabled=false;b.textContent=setup?"Créer le code":"Entrer"}
+  };
+  $("go").onclick=submit;
+  pin.addEventListener("keydown",e=>{if(e.key==="Enter"&&!setup)submit()});
+  if(setup)$("pin2").addEventListener("keydown",e=>{if(e.key==="Enter")submit()});
+}
+
+function logout(){TOKEN="";localStorage.removeItem("lba_admin");boot()}
+
+/* ============== ICONS ============== */
+const _SVG='fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"';
+const IC={
+  refresh:`<svg viewBox="0 0 24 24" ${_SVG}><path d="M20 11a8 8 0 1 1-2.3-5.7"/><path d="M20 4v5h-5"/></svg>`,
+  exit:`<svg viewBox="0 0 24 24" ${_SVG}><path d="M15 4h3a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-3"/><path d="M10 8l-4 4 4 4"/><path d="M6 12h10"/></svg>`,
+  home:`<svg viewBox="0 0 24 24" ${_SVG}><path d="M3.5 10.5 12 3l8.5 7.5"/><path d="M5.5 9.5V21h5v-6h3v6h5V9.5"/></svg>`,
+  users:`<svg viewBox="0 0 24 24" ${_SVG}><circle cx="9" cy="8" r="3.2"/><path d="M3.5 20c0-3.3 2.5-5.5 5.5-5.5s5.5 2.2 5.5 5.5"/><path d="M16.5 6.3a3 3 0 0 1 0 5.4"/><path d="M21 20c0-2.5-1.5-4.4-3.6-5"/></svg>`,
+  cal:`<svg viewBox="0 0 24 24" ${_SVG}><rect x="3.5" y="4.5" width="17" height="16" rx="3"/><path d="M3.5 9.5h17"/><path d="M8 3v3M16 3v3"/></svg>`,
+  scissors:`<svg viewBox="0 0 24 24" ${_SVG}><circle cx="6" cy="6" r="2.4"/><circle cx="6" cy="18" r="2.4"/><path d="M8.2 7.6 20 18M8.2 16.4 20 6"/></svg>`,
+  tag:`<svg viewBox="0 0 24 24" ${_SVG}><path d="M20.5 13.4 12.6 21.3a1.5 1.5 0 0 1-2.1 0L3 13.8V5a2 2 0 0 1 2-2h8.8z"/><circle cx="8" cy="8" r="1.3"/></svg>`,
+  more:`<svg viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="1.7"/><circle cx="12" cy="12" r="1.7"/><circle cx="19" cy="12" r="1.7"/></svg>`
+};
+
+/* ============== SHELL ============== */
+async function loadDash(){
+  DATA=await api("bootstrap");
+  renderShell();
+  go(TAB);
+}
+const TABDEF=[["dash","Tableau"],["rdv","RDV"],["clients","Clients"],["presta","Prestations"],["dispo","Dispos"],["ferm","Fermetures"],["promo","Promos"],["fid","Fidélité"],["banner","Bannière"],["gal","Galerie"],["contenu","Contenu"],["apparence","Apparence"]];
+function renderShell(){
+  app.innerHTML=`
+    <div class="topbar">
+      <div class="who"><div class="ava">LA</div><div><div class="hi">Pilotage</div><div class="hello">Locks by Afro</div></div></div>
+      <div class="trow">
+        <button class="ic" onclick="loadDash()" aria-label="Rafraîchir">${IC.refresh}</button>
+        <button class="ic" onclick="logout()" aria-label="Quitter">${IC.exit}</button>
+      </div>
+    </div>
+    <div id="view"></div>
+    <nav class="bnav">
+      <button data-k="dash" onclick="go('dash')">${IC.home}<span>Tableau</span></button>
+      <button data-k="clients" onclick="go('clients')">${IC.users}<span>Clients</span></button>
+      <button class="ctr" data-k="rdv" onclick="go('rdv')"><span class="bi">${IC.cal}</span></button>
+      <button data-k="presta" onclick="go('presta')">${IC.scissors}<span>Presta</span></button>
+      <button data-k="plus" onclick="moreSheet()">${IC.more}<span>Plus</span></button>
+    </nav>`;
+}
+function moreSheet(){
+  const items=[["dispo","Disponibilités"],["ferm","Fermetures"],["promo","Promos"],["fid","Fidélité"],["banner","Bannière"],["gal","Galerie"],["contenu","Contenu"],["apparence","Apparence"]];
+  sheet(`<div class="hd"><h3>Plus d'outils</h3><button class="x" onclick="closeSheet(this)">×</button></div>
+    <div class="morelist">${items.map(([k,l])=>`<button class="moreit" onclick="closeSheet(this);go('${k}')">${l}</button>`).join("")}</div>`);
+}
+function go(k){
+  TAB=k;
+  const main=["dash","rdv","clients","presta"];
+  document.querySelectorAll(".bnav button").forEach(b=>{const dk=b.dataset.k;b.classList.toggle("on",dk===k||(dk==="plus"&&!main.includes(k)))});
+  const map={dash:vDash,rdv:vRdv,clients:vClients,presta:vPresta,dispo:vDispo,ferm:vFerm,promo:vPromo,fid:vFid,banner:vBanner,gal:vGal,contenu:vContenu,apparence:vApparence};
+  (map[k]||vDash)();
+  window.scrollTo(0,0);
+}
+function setView(html){$("view").innerHTML=html}
+
+/* ============== SHEETS ============== */
+function sheet(html){
+  let bg=document.createElement("div");bg.className="sheet-bg";
+  bg.innerHTML=`<div class="sheet">${html}</div>`;
+  bg.addEventListener("click",e=>{if(e.target===bg)bg.remove()});
+  document.body.appendChild(bg);
+  return bg;
+}
+function closeSheet(el){const bg=el.closest?el.closest(".sheet-bg"):null;(bg||document.querySelector(".sheet-bg"))?.remove()}
+
+/* ============== PILLS ============== */
+function statusPill(s){const m={pending:["amber","En attente"],confirmed:["ok","Confirmé"],done:["blue","Terminé"],cancelled:["red","Annulé"],no_show:["gray","No-show"]};const[c,l]=m[s]||["gray",s||"—"];return `<span class="pill ${c}">${l}</span>`}
+function payPill(p){const m={unpaid:["gray","Non payé"],deposit_paid:["amber","Acompte payé"],paid:["ok","Payé"]};const[c,l]=m[p]||["gray",p||"—"];return `<span class="pill ${c}">${l}</span>`}
+
+/* ============== DASH ============== */
+function vDash(){
+  const c=DATA.counts||{};
+  const up=DATA.upcoming||[];
+  setView(`
+    <div class="hero">
+      <div class="lab">Encaissé ce mois</div>
+      <div class="amt">${euro(c.ca_month_cents||0)}</div>
+      <div class="sub">${c.today||0} RDV aujourd'hui · ${c.upcoming||0} à venir · ${c.clients||0} clients</div>
+      <div class="hbtns">
+        <button onclick="go('rdv')">Voir les RDV</button>
+        <button class="alt" onclick="go('clients')">Clients</button>
+      </div>
+    </div>
+    <div class="circles">
+      <button class="c" onclick="go('rdv')"><span class="ico">${IC.cal}</span><span class="lbl">RDV</span></button>
+      <button class="c" onclick="go('clients')"><span class="ico">${IC.users}</span><span class="lbl">Clients</span></button>
+      <button class="c" onclick="go('presta')"><span class="ico">${IC.scissors}</span><span class="lbl">Presta</span></button>
+      <button class="c" onclick="go('promo')"><span class="ico">${IC.tag}</span><span class="lbl">Promos</span></button>
+    </div>
+    <div class="card">
+      <div class="between" style="margin-bottom:6px"><h3>Prochains rendez-vous</h3><button class="btn sm sec" onclick="go('rdv')">Tout voir</button></div>
+      <div class="list">${up.length?up.slice(0,8).map(bkRow).join(""):'<div class="muted" style="padding:8px 0">Aucun rendez-vous à venir.</div>'}</div>
+    </div>`);
+}
+
+/* ============== RDV ============== */
+let RDV_SCOPE="upcoming";
+async function vRdv(){
+  setView(`<h2>Rendez-vous</h2>
+    <div class="tabs" style="position:static;border:0;padding:0 0 12px">
+      ${[["upcoming","À venir"],["pending","En attente"],["past","Passés"],["all","Tous"]].map(([k,l])=>`<button data-s="${k}" class="${RDV_SCOPE===k?'on':''}" onclick="rdvScope('${k}')">${l}</button>`).join("")}
+    </div>
+    <div id="rdvlist" class="card"><div class="muted">Chargement…</div></div>`);
+  loadRdv();
+}
+function rdvScope(s){RDV_SCOPE=s;document.querySelectorAll('#view .tabs button').forEach(b=>b.classList.toggle("on",b.dataset.s===s));loadRdv()}
+async function loadRdv(){
+  try{const j=await api("bookings",{scope:RDV_SCOPE});const b=j.bookings||[];
+    $("rdvlist").innerHTML=b.length?`<div class="list">${b.map(bkRow).join("")}</div>`:'<div class="muted">Aucun rendez-vous.</div>';
+  }catch(e){if(e.message!=="auth")$("rdvlist").innerHTML='<div class="err">'+esc(e.message)+'</div>'}
+}
+let BK={};
+function bkRow(b){
+  BK[b.id]=b;
+  return `<div class="it" onclick='bkSheet("${b.id}")'>
+    <div style="min-width:0">
+      <div style="font-weight:700">${esc(b.client_name||"Client")}</div>
+      <div class="tag">${esc(b.service_name||"")} · ${dt(b.start_at)}</div>
+    </div>
+    <div style="text-align:right;flex:0 0 auto">${statusPill(b.status)}<div style="margin-top:4px">${payPill(b.payment_status)}</div></div>
+  </div>`;
+}
+function bkSheet(id){
+  const b=BK[id];if(!b)return;
+  const intake=b.intake_responses&&typeof b.intake_responses==="object"?b.intake_responses:null;
+  const bg=sheet(`
+    <div class="hd"><h3>Rendez-vous</h3><button class="x" onclick="closeSheet(this)">×</button></div>
+    <div class="card">
+      <div class="between"><div style="font-weight:800;font-size:17px">${esc(b.client_name)}</div>${statusPill(b.status)}</div>
+      <div class="tag" style="margin-top:4px">${esc(b.service_name)}</div>
+      <div class="kv" style="margin-top:8px"><span>Date</span><b>${dt(b.start_at)}</b></div>
+      ${b.client_phone?`<div class="kv"><span>Téléphone</span><b><a href="tel:${esc(b.client_phone)}" style="color:var(--red);text-decoration:none">${esc(b.client_phone)}</a></b></div>`:""}
+      ${b.client_email?`<div class="kv"><span>Email</span><b>${esc(b.client_email)}</b></div>`:""}
+      <div class="kv"><span>Total</span><b>${euro(b.total_amount_cents)}</b></div>
+      <div class="kv"><span>Acompte</span><b>${euro(b.deposit_amount_cents)} · ${payPill(b.payment_status)}</b></div>
+    </div>
+    ${intake?`<div class="card"><h3>Diagnostic client</h3>${renderKV(intake)}</div>`:""}
+    <div class="card">
+      <h3>Statut</h3>
+      <div class="grid2">
+        <button class="btn sm" style="width:100%" onclick="bkStatus('${b.id}','confirmed')">Confirmer</button>
+        <button class="btn sm dark" style="width:100%" onclick="bkStatus('${b.id}','done')">Terminé</button>
+        <button class="btn sm sec" style="width:100%" onclick="bkStatus('${b.id}','no_show')">No-show</button>
+        <button class="btn sm danger" style="width:100%" onclick="bkStatus('${b.id}','cancelled')">Annuler</button>
+      </div>
+    </div>
+    <div class="card">
+      <h3>Devis (sur-mesure)</h3>
+      <p class="muted" style="margin:0 0 8px;font-size:13px">Pour les prestations sur devis : fixe le montant total et l'acompte.</p>
+      <label>Total (€)</label><input id="q_tot" type="number" min="0" step="1" value="${((b.total_amount_cents||0)/100)}">
+      <label>Acompte (€)</label><input id="q_dep" type="number" min="0" step="1" value="${((b.deposit_amount_cents||0)/100)}">
+      <div style="margin-top:12px"><button class="btn" onclick="bkQuote('${b.id}')">Enregistrer le devis</button></div>
+    </div>`);
+  return bg;
+}
+async function bkStatus(id,st){
+  try{await api("booking_status",{id,status:st});toast("Statut mis à jour.");document.querySelector(".sheet-bg")?.remove();
+    if(TAB==="rdv")loadRdv();else if(TAB==="dash")loadDash();
+  }catch(e){if(e.message!=="auth")toast(e.message)}
+}
+async function bkQuote(id){
+  const tot=Math.round((parseFloat($("q_tot").value)||0)*100);
+  const dep=Math.round((parseFloat($("q_dep").value)||0)*100);
+  try{await api("booking_quote",{id,total_cents:tot,deposit_cents:dep});toast("Devis enregistré.");document.querySelector(".sheet-bg")?.remove();
+    if(TAB==="rdv")loadRdv();
+  }catch(e){if(e.message!=="auth")toast(e.message)}
+}
+function renderKV(o){const ks=Object.keys(o||{});if(!ks.length)return'<div class="muted">Aucune réponse.</div>';return ks.map(k=>`<div class="kv"><span>${esc(k)}</span><b style="text-align:right;max-width:60%">${esc(typeof o[k]==="object"?JSON.stringify(o[k]):o[k])}</b></div>`).join("")}
+
+/* ============== CLIENTS ============== */
+function vClients(){
+  setView(`<h2>Clients</h2>
+    <div class="card" style="padding:10px"><input id="cq" placeholder="Rechercher nom, email, téléphone…" oninput="cliSearch()"></div>
+    <div id="clist" class="card"><div class="muted">Chargement…</div></div>`);
+  loadClients("");
+}
+let _cqT;
+function cliSearch(){clearTimeout(_cqT);_cqT=setTimeout(()=>loadClients($("cq").value.trim()),250)}
+let CLI={};
+async function loadClients(q){
+  try{const j=await api("clients",{q});const cs=j.clients||[];
+    $("clist").innerHTML=cs.length?`<div class="list">${cs.map(cliRow).join("")}</div>`:'<div class="muted">Aucun client.</div>';
+  }catch(e){if(e.message!=="auth")$("clist").innerHTML='<div class="err">'+esc(e.message)+'</div>'}
+}
+function cliRow(c){
+  CLI[c.id]=c;
+  return `<div class="it" onclick='cliSheet("${c.id}")'>
+    <div style="min-width:0">
+      <div style="font-weight:700">${esc(c.full_name||"Client")}</div>
+      <div class="tag">${esc(c.email||c.phone||"")}</div>
+    </div>
+    <div style="text-align:right;flex:0 0 auto">
+      <span class="pill ${c.account_active?'ok':'gray'}">${c.account_active?"Compte":"Invité"}</span>
+      <div class="tag" style="margin-top:4px">⭑ ${c.loyalty_stamps||0}</div>
+    </div>
+  </div>`;
+}
+async function cliSheet(id){
+  let res;
+  try{res=await api("client",{id})}catch(e){if(e.message!=="auth")toast(e.message);return}
+  const c=res.client||{};const bks=res.bookings||[];
+  const diag=c.last_diagnostic&&typeof c.last_diagnostic==="object"?c.last_diagnostic:null;
+  sheet(`
+    <div class="hd"><h3>Fiche client</h3><button class="x" onclick="closeSheet(this)">×</button></div>
+    <div class="card">
+      <div style="font-weight:800;font-size:18px">${esc(c.full_name)}</div>
+      <div class="kv" style="margin-top:8px"><span>Email</span><b>${esc(c.email||"—")}</b></div>
+      ${c.phone?`<div class="kv"><span>Téléphone</span><b><a href="tel:${esc(c.phone)}" style="color:var(--red);text-decoration:none">${esc(c.phone)}</a></b></div>`:""}
+      <div class="kv"><span>Compte</span><b>${c.account_active?"Actif":"Invité"}</b></div>
+      <div class="kv"><span>Fidélité</span><b>${c.loyalty_stamps||0} tampon(s)</b></div>
+      <div class="kv"><span>Client depuis</span><b>${dshort(c.created_at)}</b></div>
+    </div>
+    ${diag?`<div class="card"><h3>Dernier diagnostic</h3>${renderKV(diag)}${c.diagnostic_at?`<div class="tag" style="margin-top:6px">Le ${dshort(c.diagnostic_at)}</div>`:""}</div>`:""}
+    <div class="card">
+      <h3>Note privée</h3>
+      <textarea id="cnote">${esc(c.notes||"")}</textarea>
+      <div style="margin-top:10px"><button class="btn sec" onclick="cliNote('${c.id}')">Enregistrer la note</button></div>
+    </div>
+    <div class="card">
+      <h3>Historique (${bks.length})</h3>
+      <div class="list">${bks.length?bks.map(b=>`<div class="it"><div style="min-width:0"><div style="font-weight:600">${esc(b.service_name)}</div><div class="tag">${dt(b.start_at)} · ${euro(b.total_amount_cents)}</div></div>${statusPill(b.status)}</div>`).join(""):'<div class="muted">Aucun rendez-vous.</div>'}</div>
+    </div>
+    <div class="card">
+      <h3 style="color:var(--red)">Zone sensible</h3>
+      ${c.account_active?`<div style="margin-bottom:8px"><button class="btn sec" onclick="cliDeactivate('${c.id}')">Désactiver le compte</button></div><div class="tag" style="margin-bottom:10px">Bloque la connexion. RDV + fidélité conservés. Réversible.</div>`:""}
+      <button class="btn danger" onclick="cliPurge('${c.id}')">Supprimer définitivement</button>
+      <div class="tag" style="margin-top:6px">Efface le client, ses RDV, paiements et promos nominatives. Irréversible.</div>
+    </div>`);
+}
+async function cliNote(id){
+  try{await api("client_note",{id,notes:$("cnote").value});toast("Note enregistrée.")}catch(e){if(e.message!=="auth")toast(e.message)}
+}
+async function cliDeactivate(id){
+  const nm=(CLI[id]&&CLI[id].full_name)||"ce compte";
+  if(!confirm(`Désactiver le compte de ${nm} ?\n\nIl ne pourra plus se connecter. RDV et fidélité conservés. Réversible.`))return;
+  try{await api("client_delete",{id,mode:"deactivate"});document.querySelector(".sheet-bg")?.remove();toast("Compte désactivé.");loadClients(($("cq")&&$("cq").value.trim())||"")}
+  catch(e){if(e.message!=="auth")toast(e.message)}
+}
+async function cliPurge(id){
+  const nm=(CLI[id]&&CLI[id].full_name)||"ce client";
+  if(!confirm(`SUPPRIMER définitivement ${nm} ?\n\nSes rendez-vous, paiements et codes promo nominatifs seront effacés.\nAction irréversible.`))return;
+  try{await api("client_delete",{id,mode:"purge"});document.querySelector(".sheet-bg")?.remove();toast("Client supprimé.");loadClients(($("cq")&&$("cq").value.trim())||"")}
+  catch(e){if(e.message!=="auth")toast(e.message)}
+}
+
+/* ============== PRESTATIONS ============== */
+function depLabel(s){
+  if(s.deposit_type==="percent")return (s.deposit_value!=null?s.deposit_value+"%":"auto")+" acompte";
+  if(s.deposit_type==="fixed")return (s.deposit_value!=null?euro(s.deposit_value):"—")+" acompte";
+  return "sans acompte";
+}
+function vPresta(){
+  const S=DATA.settings||{};
+  const sv=(DATA.services||[]).slice().sort((a,b)=>(a.sort_order||0)-(b.sort_order||0));
+  setView(`<h2>Prestations</h2>
+    <div class="card" style="border-left:3px solid var(--red)">
+      <h3>Grille acompte automatique</h3>
+      <p class="muted" style="margin:0 0 10px;font-size:13px">S'applique aux prestations en type « Pourcentage » dont la valeur est laissee vide. Prix ≥ seuil → ce %. En dessous → aucun acompte. Une valeur saisie sur une prestation (% ou montant fixe) reste prioritaire. ⚠️ Reglage partage avec le site public (calcul de l'acompte a la reservation).</p>
+      <div class="grid2">
+        <div><label>Seuil (€)</label><input id="g_thr" type="number" min="0" step="1" value="${esc(S.deposit_threshold_eur||"100")}"></div>
+        <div><label>Acompte auto (%)</label><input id="g_pct" type="number" min="0" max="100" step="1" value="${esc(S.deposit_pct||"0")}"></div>
+      </div>
+      <div style="margin-top:10px"><button class="btn" onclick="gridSave()">Enregistrer la grille</button></div>
+    </div>
+    <div style="margin-bottom:12px"><button class="btn" onclick="prestaEdit(null)">+ Nouvelle prestation</button></div>
+    <div class="card"><div class="list">${sv.length?sv.map(prestaRow).join(""):'<div class="muted">Aucune prestation.</div>'}</div></div>`);
+}
+async function gridSave(){
+  const patch={deposit_pct:String(parseInt($("g_pct").value,10)||0),deposit_threshold_eur:String(parseInt($("g_thr").value,10)||0)};
+  try{await api("settings_save",{patch});DATA.settings=Object.assign(DATA.settings||{},patch);toast("Grille acompte enregistree.")}
+  catch(e){if(e.message!=="auth")toast(e.message)}
+}
+function prestaRow(s){
+  return `<div class="it" onclick='prestaEdit("${s.id}")'>
+    <div style="min-width:0">
+      <div style="font-weight:700">${esc(s.name)} ${s.active===false?'<span class="pill gray">masquée</span>':''}</div>
+      <div class="tag">${euro(s.price_cents)} · ${esc(s.duree_txt||(s.duration_min+" min"))} · ${esc(depLabel(s))}</div>
+    </div><div class="tag">›</div>
+  </div>`;
+}
+function svById(id){return (DATA.services||[]).find(s=>s.id===id)}
+function prestaEdit(id){
+  const S=DATA.settings||{};
+  const s=id?svById(id)||{}:{};
+  const isFixed=s.deposit_type==="fixed";
+  const depDisplay=s.deposit_value==null?"":(isFixed?(s.deposit_value/100):s.deposit_value);
+  const aw=Array.isArray(s.allowed_weekdays)?s.allowed_weekdays.map(Number):[];
+  sheet(`
+    <div class="hd"><h3>${id?"Modifier":"Nouvelle"} prestation</h3><button class="x" onclick="closeSheet(this)">×</button></div>
+    <label>Nom</label><input id="p_name" value="${esc(s.name||"")}">
+    <label>Catégorie</label><input id="p_cat" value="${esc(s.category||"")}" placeholder="ex. Entretien">
+    <div class="grid2">
+      <div><label>Prix (€)</label><input id="p_price" type="number" min="0" step="1" value="${s.price_cents!=null?s.price_cents/100:""}"></div>
+      <div><label>Durée (min)</label><input id="p_dur" type="number" min="0" step="5" value="${s.duration_min!=null?s.duration_min:60}"></div>
+    </div>
+    <label>Durée affichée</label><input id="p_durtxt" value="${esc(s.duree_txt||"")}" placeholder="ex. 2h / 1h30">
+    <label>Description</label><textarea id="p_desc">${esc(s.description||"")}</textarea>
+    <label>Type d'acompte</label>
+    <select id="p_dtype" onchange="prestaDepUI()">
+      <option value="none" ${(!s.deposit_type||s.deposit_type==="none")?"selected":""}>Aucun</option>
+      <option value="percent" ${s.deposit_type==="percent"?"selected":""}>Pourcentage</option>
+      <option value="fixed" ${s.deposit_type==="fixed"?"selected":""}>Montant fixe</option>
+    </select>
+    <div id="p_depwrap"><label id="p_deplbl"></label><input id="p_dval" type="number" min="0" step="1" value="${depDisplay}"></div>
+    <p class="muted" style="margin:6px 0 0;font-size:12px">Aucun = jamais d'acompte. Pourcentage <b>sans valeur</b> = la grille auto s'applique (${esc(S.deposit_pct||"0")}% si prix ≥ ${esc(S.deposit_threshold_eur||"100")}€). Pourcentage / Montant fixe <b>avec valeur</b> = force pour cette prestation.</p>
+    <label>Jours autorisés <span class="muted">(aucun coché = tous les jours)</span></label>
+    <div class="daysel" id="p_days">${DAYS.map((d,i)=>`<div class="d ${aw.includes(i)?'on':''}" data-d="${i}" onclick="this.classList.toggle('on')">${d}</div>`).join("")}</div>
+    <div class="grid2">
+      <div><label>Ordre</label><input id="p_sort" type="number" step="1" value="${s.sort_order!=null?s.sort_order:0}"></div>
+      <div><label>Visible</label><select id="p_active"><option value="1" ${s.active!==false?"selected":""}>Oui</option><option value="0" ${s.active===false?"selected":""}>Non</option></select></div>
+    </div>
+    <label>Image (URL)</label><input id="p_img" value="${esc(s.image_url||"")}" placeholder="https://…">
+    <div style="margin-top:14px"><button class="btn" onclick="prestaSave('${id||""}')">Enregistrer</button></div>
+    ${id?`<div style="margin-top:8px"><button class="btn danger" onclick="prestaDel('${id}')">Supprimer la prestation</button></div>`:""}
+  `);
+  prestaDepUI();
+}
+function prestaDepUI(){
+  const t=$("p_dtype").value;const w=$("p_depwrap");const l=$("p_deplbl");
+  if(t==="none"){w.style.display="none";return}
+  w.style.display="block";l.textContent=t==="percent"?"Valeur acompte (%)":"Montant acompte (€)";
+}
+async function prestaSave(id){
+  const t=$("p_dtype").value;
+  let dval=null;
+  if(t!=="none"){const raw=parseFloat($("p_dval").value);if(!isNaN(raw))dval=t==="fixed"?Math.round(raw*100):Math.round(raw)}
+  const days=[...document.querySelectorAll("#p_days .d.on")].map(d=>+d.dataset.d);
+  const service={
+    name:$("p_name").value.trim()||"Prestation",
+    category:$("p_cat").value.trim()||null,
+    description:$("p_desc").value.trim()||null,
+    price_cents:Math.round((parseFloat($("p_price").value)||0)*100),
+    duration_min:parseInt($("p_dur").value,10)||60,
+    duree_txt:$("p_durtxt").value.trim()||null,
+    deposit_type:t,
+    deposit_value:dval,
+    sort_order:parseInt($("p_sort").value,10)||0,
+    active:$("p_active").value==="1",
+    image_url:$("p_img").value.trim()||null,
+    allowed_weekdays:days.length?days:null
+  };
+  if(id)service.id=id;
+  try{await api("service_save",{service});toast("Prestation enregistrée.");document.querySelector(".sheet-bg")?.remove();DATA=await api("bootstrap");go("presta")}
+  catch(e){if(e.message!=="auth")toast(e.message)}
+}
+async function prestaDel(id){
+  if(!confirm("Supprimer définitivement cette prestation ?"))return;
+  try{await api("service_delete",{id});toast("Prestation supprimée.");document.querySelector(".sheet-bg")?.remove();DATA=await api("bootstrap");go("presta")}
+  catch(e){if(e.message!=="auth")toast(e.message)}
+}
+
+/* ============== DISPOS ============== */
+function vDispo(){
+  const S=DATA.settings||{};
+  const open=(S.open_days||"").split(",").map(x=>x.trim()).filter(x=>x!=="").map(Number);
+  setView(`<h2>Disponibilités</h2>
+    <div class="card">
+      <h3>Jours d'ouverture</h3>
+      <div class="daysel" id="d_days">${DAYS.map((d,i)=>`<div class="d ${open.includes(i)?'on':''}" data-d="${i}" onclick="this.classList.toggle('on')">${d}</div>`).join("")}</div>
+    </div>
+    <div class="card">
+      <h3>Créneaux horaires</h3>
+      <p class="muted" style="margin:0 0 8px;font-size:13px">Une heure par ligne (ou séparées par des virgules), format 24h.</p>
+      <textarea id="d_hours" style="min-height:140px">${esc((S.hours||"").split(",").map(x=>x.trim()).filter(Boolean).join("\n"))}</textarea>
+    </div>
+    <div style="margin-bottom:8px;font-size:13px" class="muted">La synchronisation Google Agenda (créneaux occupés bloqués) tourne déjà côté serveur.</div>
+    <button class="btn" onclick="dispoSave()">Enregistrer</button>`);
+}
+async function dispoSave(){
+  const days=[...document.querySelectorAll("#d_days .d.on")].map(d=>+d.dataset.d).sort((a,b)=>a-b);
+  const hours=$("d_hours").value.split(/[\n,]+/).map(x=>x.trim()).filter(x=>/^\d{1,2}:\d{2}$/.test(x)).join(",");
+  const patch={open_days:days.join(","),hours};
+  try{await api("settings_save",{patch});DATA.settings=Object.assign(DATA.settings||{},patch);toast("Disponibilités enregistrées.")}
+  catch(e){if(e.message!=="auth")toast(e.message)}
+}
+
+/* ============== FERMETURES ============== */
+function vFerm(){
+  const cl=(DATA.closures||[]).slice().sort((a,b)=>(a.date<b.date?-1:1));
+  setView(`<h2>Fermetures</h2>
+    <div class="card">
+      <h3>Ajouter une date</h3>
+      <label>Date</label><input id="f_date" type="date">
+      <label>Motif (optionnel)</label><input id="f_reason" placeholder="ex. Congés">
+      <div style="margin-top:12px"><button class="btn" onclick="fermAdd()">Bloquer cette journée</button></div>
+    </div>
+    <div class="card">
+      <h3>Bloquer une plage (congés)</h3>
+      <label>Du</label><input id="f_start" type="date">
+      <label>Au</label><input id="f_end" type="date">
+      <label>Motif (optionnel)</label><input id="f_reason2" placeholder="ex. Congés">
+      <div style="margin-top:12px"><button class="btn" onclick="fermAddRange()">Bloquer la plage</button></div>
+    </div>
+    <div class="card">
+      <h3>Journées fermées (${cl.length})</h3>
+      <div class="list" id="flist">${cl.length?cl.map(fermRow).join(""):'<div class="muted">Aucune fermeture.</div>'}</div>
+    </div>`);
+}
+function fermRow(c){
+  return `<div class="it"><div><div style="font-weight:600">${dshort(c.date)}</div>${c.reason?`<div class="tag">${esc(c.reason)}</div>`:""}</div><button class="btn sm danger" onclick="fermDel('${c.date}')">Retirer</button></div>`;
+}
+async function fermAdd(){
+  const date=$("f_date").value;if(!date){toast("Choisis une date.");return}
+  try{await api("closure_add",{date,reason:$("f_reason").value.trim()||null});const j=await api("closures");DATA.closures=j.closures||[];go("ferm");toast("Journée bloquée.")}
+  catch(e){if(e.message!=="auth")toast(e.message)}
+}
+async function fermAddRange(){
+  const start=$("f_start").value,end=$("f_end").value;
+  if(!start||!end){toast("Choisis les deux dates.");return}
+  try{const j=await api("closure_add_range",{start,end,reason:$("f_reason2").value.trim()||null});const k=await api("closures");DATA.closures=k.closures||[];go("ferm");toast((j.count||0)+" journée(s) bloquée(s).")}
+  catch(e){if(e.message!=="auth")toast(e.message)}
+}
+async function fermDel(date){
+  try{await api("closure_del",{date});DATA.closures=(DATA.closures||[]).filter(c=>c.date!==date);go("ferm");toast("Fermeture retirée.")}
+  catch(e){if(e.message!=="auth")toast(e.message)}
+}
+
+/* ============== PROMOS ============== */
+const KINDLBL={campaign:"Campagne",nominative:"Nominatif",loyalty:"Fidélité",banner:"Bannière"};
+function vPromo(){
+  const ps=(DATA.promos||[]);
+  setView(`<h2>Codes promo</h2>
+    <div style="margin-bottom:12px"><button class="btn" onclick="promoNew()">+ Nouveau code</button></div>
+    <div class="card"><div class="list" id="plist">${ps.length?ps.map(promoRow).join(""):'<div class="muted">Aucun code.</div>'}</div></div>`);
+}
+function promoRow(p){
+  return `<div class="it">
+    <div style="min-width:0">
+      <div style="font-weight:700;letter-spacing:1px">${esc(p.code)} <span class="pill ${p.active?'ok':'gray'}">${p.active?"actif":"inactif"}</span></div>
+      <div class="tag">−${p.percent}% · ${KINDLBL[p.kind]||p.kind}${p.single_use?" · usage unique":""}${p.expires_at?" · exp. "+dshort(p.expires_at):""}</div>
+    </div>
+    <div class="row" style="flex:0 0 auto">
+      <button class="btn sm sec" onclick="promoToggle('${p.id}',${p.active?0:1})">${p.active?"Désactiver":"Activer"}</button>
+      <button class="btn sm danger" onclick="promoDel('${p.id}')">×</button>
+    </div>
+  </div>`;
+}
+function promoNew(){
+  sheet(`
+    <div class="hd"><h3>Nouveau code promo</h3><button class="x" onclick="closeSheet(this)">×</button></div>
+    <label>Type</label>
+    <select id="pr_kind" onchange="promoKindUI()">
+      <option value="campaign">Campagne (tout le monde)</option>
+      <option value="nominative">Nominatif (un client)</option>
+    </select>
+    <div id="pr_emailwrap" style="display:none"><label>Email du client</label><input id="pr_email" type="email" placeholder="client@email.com"></div>
+    <label>Code (laisser vide = généré)</label><input id="pr_code" placeholder="ex. RENTREE25" style="letter-spacing:1px">
+    <label>Réduction (%)</label><input id="pr_pct" type="number" min="1" max="100" step="1" value="10">
+    <label>Expiration (optionnel)</label><input id="pr_exp" type="date">
+    <label>Usage unique par client</label><select id="pr_single"><option value="1" selected>Oui</option><option value="0">Non</option></select>
+    <div style="margin-top:14px"><button class="btn" onclick="promoCreate()">Créer le code</button></div>
+  `);
+}
+function promoKindUI(){$("pr_emailwrap").style.display=$("pr_kind").value==="nominative"?"block":"none"}
+async function promoCreate(){
+  const kind=$("pr_kind").value;
+  const promo={kind,percent:parseInt($("pr_pct").value,10)||10,code:$("pr_code").value.trim()||undefined,expires_at:$("pr_exp").value||null,single_use:$("pr_single").value==="1"};
+  if(kind==="nominative"){
+    const em=$("pr_email").value.trim();if(!em){toast("Renseigne l'email du client.");return}
+    try{const j=await api("clients",{q:em});const c=(j.clients||[]).find(x=>(x.email||"").toLowerCase()===em.toLowerCase())||(j.clients||[])[0];
+      if(!c){toast("Aucun client avec cet email.");return}promo.client_id=c.id;
+    }catch(e){if(e.message!=="auth")toast(e.message);return}
+  }
+  try{const j=await api("promo_save",{promo});toast("Code créé"+(j.code?" : "+j.code:"")+".");document.querySelector(".sheet-bg")?.remove();const r=await api("promos");DATA.promos=r.promos||[];go("promo")}
+  catch(e){if(e.message!=="auth")toast(e.message)}
+}
+async function promoToggle(id,active){
+  try{await api("promo_save",{promo:{id,active:!!active}});const r=await api("promos");DATA.promos=r.promos||[];go("promo")}
+  catch(e){if(e.message!=="auth")toast(e.message)}
+}
+async function promoDel(id){
+  if(!confirm("Supprimer ce code ?"))return;
+  try{await api("promo_delete",{id});DATA.promos=(DATA.promos||[]).filter(p=>p.id!==id);go("promo");toast("Code supprimé.")}
+  catch(e){if(e.message!=="auth")toast(e.message)}
+}
+
+/* ============== FIDÉLITÉ ============== */
+function vFid(){
+  const S=DATA.settings||{};
+  setView(`<h2>Programme fidélité</h2>
+    <div class="card">
+      <div class="between"><h3>Activer le programme</h3>
+        <select id="fi_on" style="width:auto"><option value="1" ${S.loyalty_enabled==="1"?"selected":""}>Activé</option><option value="0" ${S.loyalty_enabled!=="1"?"selected":""}>Désactivé</option></select>
+      </div>
+      <p class="muted" style="margin:8px 0 0;font-size:13px">Un tampon est ajouté à chaque acompte payé.</p>
+    </div>
+    <div class="card">
+      <label>Nombre de tampons pour la récompense</label><input id="fi_thr" type="number" min="1" step="1" value="${esc(S.loyalty_threshold||"10")}">
+      <label>Réduction de la récompense (%)</label><input id="fi_pct" type="number" min="1" max="100" step="1" value="${esc(S.loyalty_reward_pct||"100")}">
+      <label>Libellé de la récompense</label><input id="fi_lbl" value="${esc(S.loyalty_reward_label||"Entretien offert")}">
+      <p class="muted" style="margin:10px 0 0;font-size:13px">Au seuil atteint, un code de récompense est généré automatiquement et les tampons sont remis à zéro.</p>
+    </div>
+    <button class="btn" onclick="fidSave()">Enregistrer</button>`);
+}
+async function fidSave(){
+  const patch={loyalty_enabled:$("fi_on").value,loyalty_threshold:String(parseInt($("fi_thr").value,10)||10),loyalty_reward_pct:String(parseInt($("fi_pct").value,10)||100),loyalty_reward_label:$("fi_lbl").value.trim()||"Récompense"};
+  try{await api("settings_save",{patch});DATA.settings=Object.assign(DATA.settings||{},patch);toast("Fidélité enregistrée.")}
+  catch(e){if(e.message!=="auth")toast(e.message)}
+}
+
+/* ============== BANNIÈRE ============== */
+function vBanner(){
+  const S=DATA.settings||{};
+  setView(`<h2>Bannière promo</h2>
+    <div class="card">
+      <div class="between"><h3>Afficher la bannière</h3>
+        <select id="b_on" style="width:auto"><option value="1" ${S.promo_active==="1"?"selected":""}>Visible</option><option value="0" ${S.promo_active!=="1"?"selected":""}>Masquée</option></select>
+      </div>
+    </div>
+    <div class="card">
+      <label>Titre</label><input id="b_lbl" value="${esc(S.promo_label||"Offre du moment")}">
+      <label>Texte</label><textarea id="b_txt">${esc(S.promo_text||"")}</textarea>
+      <div class="grid2">
+        <div><label>Réduction (%)</label><input id="b_pct" type="number" min="0" max="100" step="1" value="${esc(S.promo_pct||"0")}"></div>
+        <div><label>Code associé</label><input id="b_code" value="${esc(S.promo_code||"")}" style="letter-spacing:1px" placeholder="ex. PROMO10"></div>
+      </div>
+      <p class="muted" style="margin:10px 0 0;font-size:13px">Le code saisi ici doit aussi exister dans l'onglet Promos pour être valable au paiement.</p>
+    </div>
+    <button class="btn" onclick="bannerSave()">Enregistrer</button>`);
+}
+async function bannerSave(){
+  const patch={promo_active:$("b_on").value,promo_label:$("b_lbl").value.trim(),promo_text:$("b_txt").value.trim(),promo_pct:String(parseInt($("b_pct").value,10)||0),promo_code:$("b_code").value.trim().toUpperCase()};
+  try{await api("settings_save",{patch});DATA.settings=Object.assign(DATA.settings||{},patch);toast("Bannière enregistrée.")}
+  catch(e){if(e.message!=="auth")toast(e.message)}
+}
+
+/* ============== GALERIE ============== */
+function vGal(){
+  const g=(DATA.gallery||[]);
+  setView(`<h2>Galerie</h2>
+    <div class="card">
+      <h3>Ajouter une photo</h3>
+      <input id="g_file" type="file" accept="image/*">
+      <label>Légende (optionnel)</label><input id="g_cap" placeholder="ex. Reprise des racines">
+      <div style="margin-top:12px"><button class="btn" id="g_btn" onclick="galUpload()">Téléverser</button></div>
+    </div>
+    <div class="card">
+      <h3>Photos (${g.length})</h3>
+      <div class="gal" id="ggrid">${g.length?g.map(galCard).join(""):'<div class="muted">Aucune photo.</div>'}</div>
+    </div>`);
+}
+function galCard(x){
+  return `<div class="thumb"><img src="${esc(x.image_url)}" alt=""><button class="del" onclick="galDel('${x.id}')">×</button></div>`;
+}
+async function galUpload(){
+  const f=$("g_file").files[0];if(!f){toast("Choisis une image.");return}
+  const btn=$("g_btn");btn.disabled=true;btn.innerHTML='<span class="spin"></span>';
+  try{
+    const b64=await new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(r.result);r.onerror=rej;r.readAsDataURL(f)});
+    await api("gallery_upload",{b64,content_type:f.type||"image/jpeg",caption:$("g_cap").value.trim()||null});
+    const j=await api("gallery");DATA.gallery=j.gallery||[];go("gal");toast("Photo ajoutée.");
+  }catch(e){if(e.message!=="auth")toast(e.message);btn.disabled=false;btn.textContent="Téléverser"}
+}
+async function galDel(id){
+  if(!confirm("Supprimer cette photo ?"))return;
+  try{await api("gallery_del",{id});DATA.gallery=(DATA.gallery||[]).filter(x=>x.id!==id);go("gal");toast("Photo supprimée.")}
+  catch(e){if(e.message!=="auth")toast(e.message)}
+}
+
+/* ============== CONTENU ============== */
+function fld(label,id,val,ta){return `<label>${label}</label>${ta?`<textarea id="${id}">${esc(val||"")}</textarea>`:`<input id="${id}" value="${esc(val||"")}">`}`}
+function vContenu(){
+  const S=DATA.settings||{};
+  setView(`<h2>Contenu du site</h2>
+    <div class="card"><h3>Identité</h3>
+      ${fld("Nom de l'établissement","ct_biz",S.business_name)}
+      ${fld("Nom du site","ct_site",S.site_name)}
+    </div>
+    <div class="card"><h3>Accueil (hero)</h3>
+      ${fld("Sur-titre","ct_hk",S.hero_kicker)}
+      ${fld("Titre","ct_ht",S.hero_title)}
+      ${fld("Sous-titre","ct_hs",S.hero_subtitle,1)}
+      ${fld("Texte « À propos »","ct_about",S.about_text,1)}
+    </div>
+    <div class="card"><h3>Sections (titres)</h3>
+      ${fld("Rituels — sur-titre","ct_rk",S.sec_rituel_kicker)}
+      ${fld("Rituels — titre","ct_rt2",S.sec_rituel_title)}
+      ${fld("Prestations — sur-titre","ct_pk",S.sec_presta_kicker)}
+      ${fld("Prestations — titre","ct_pt",S.sec_presta_title)}
+      ${fld("Galerie — sur-titre","ct_gk",S.sec_gal_kicker)}
+      ${fld("Galerie — titre","ct_gt",S.sec_gal_title)}
+    </div>
+    <div class="card"><h3>Rituels (3 blocs)</h3>
+      ${fld("Bloc 1 — titre","ct_r1t",S.rituel_1_title)}
+      ${fld("Bloc 1 — texte","ct_r1x",S.rituel_1_text,1)}
+      ${fld("Bloc 2 — titre","ct_r2t",S.rituel_2_title)}
+      ${fld("Bloc 2 — texte","ct_r2x",S.rituel_2_text,1)}
+      ${fld("Bloc 3 — titre","ct_r3t",S.rituel_3_title)}
+      ${fld("Bloc 3 — texte","ct_r3x",S.rituel_3_text,1)}
+    </div>
+    <div class="card"><h3>Coordonnées</h3>
+      ${fld("Adresse","ct_addr",S.address)}
+      ${fld("Téléphone","ct_phone",S.phone)}
+      ${fld("WhatsApp","ct_wa",S.whatsapp)}
+      ${fld("Email","ct_email",S.email)}
+      ${fld("Lien Google Maps","ct_maps",S.maps_url)}
+      ${fld("Lien avis Google","ct_review",S.review_url||S.avis_url)}
+    </div>
+    <button class="btn" onclick="contenuSave()">Enregistrer le contenu</button>`);
+}
+async function contenuSave(){
+  const v=(id)=>{const e=$(id);return e?e.value.trim():""};
+  const patch={
+    business_name:v("ct_biz"),site_name:v("ct_site"),
+    hero_kicker:v("ct_hk"),hero_title:v("ct_ht"),hero_subtitle:v("ct_hs"),about_text:v("ct_about"),
+    sec_rituel_kicker:v("ct_rk"),sec_rituel_title:v("ct_rt2"),
+    sec_presta_kicker:v("ct_pk"),sec_presta_title:v("ct_pt"),
+    sec_gal_kicker:v("ct_gk"),sec_gal_title:v("ct_gt"),
+    rituel_1_title:v("ct_r1t"),rituel_1_text:v("ct_r1x"),
+    rituel_2_title:v("ct_r2t"),rituel_2_text:v("ct_r2x"),
+    rituel_3_title:v("ct_r3t"),rituel_3_text:v("ct_r3x"),
+    address:v("ct_addr"),phone:v("ct_phone"),whatsapp:v("ct_wa"),email:v("ct_email"),
+    maps_url:v("ct_maps"),review_url:v("ct_review"),avis_url:v("ct_review")
+  };
+  try{await api("settings_save",{patch});DATA.settings=Object.assign(DATA.settings||{},patch);toast("Contenu enregistré.")}
+  catch(e){if(e.message!=="auth")toast(e.message)}
+}
+
+/* ============== APPARENCE ============== */
+function vApparence(){
+  const S=DATA.settings||{};
+  const op=parseInt(S.bg_opacity||"4",10);
+  setView(`<h2>Apparence</h2>
+    <div class="card">
+      <div class="between"><h3>Logo en fond</h3>
+        <select id="a_bg" style="width:auto"><option value="logo" ${S.bg_mode!=="none"?"selected":""}>Logo flouté</option><option value="none" ${S.bg_mode==="none"?"selected":""}>Aucun</option></select>
+      </div>
+      <label>Intensité du fond (<span id="a_oplbl">${op}</span>%)</label>
+      <input id="a_op" type="range" min="0" max="20" step="1" value="${op}" oninput="$('a_oplbl').textContent=this.value">
+    </div>
+    <div class="card">
+      <div class="between"><h3>Pied de page « Powered by NexusAI »</h3>
+        <select id="a_pw" style="width:auto"><option value="1" ${S.footer_powered!=="0"?"selected":""}>Affiché</option><option value="0" ${S.footer_powered==="0"?"selected":""}>Masqué</option></select>
+      </div>
+      <label>Lien du logo NexusAI (optionnel)</label><input id="a_url" value="${esc(S.footer_url||"")}" placeholder="https://nexusai…">
+    </div>
+    <button class="btn" onclick="apparenceSave()">Enregistrer</button>`);
+}
+async function apparenceSave(){
+  const patch={bg_mode:$("a_bg").value,bg_opacity:String(parseInt($("a_op").value,10)||0),footer_powered:$("a_pw").value,footer_url:$("a_url").value.trim()};
+  try{await api("settings_save",{patch});DATA.settings=Object.assign(DATA.settings||{},patch);toast("Apparence enregistrée.")}
+  catch(e){if(e.message!=="auth")toast(e.message)}
+}
+
+/* ============== START ============== */
+boot();
+</script>
+</body>
+</html>

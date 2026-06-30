@@ -1,6 +1,6 @@
 /* Locks by Afro — service worker (app shell) */
 const CACHE = 'lba-v7';
-const ASSETS = ['./', './index.html', './admin.html', './config.js', './manifest.json', './icon-192.png', './icon-512.png', './apple-touch-icon.png', './favicon-32.png', './logo.png'];
+const ASSETS = ['./', './index.html', './pilotage.html', './config.js', './manifest.json', './icon-192.png', './icon-512.png', './apple-touch-icon.png', './favicon-32.png', './logo.png'];
 
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(ASSETS)).then(() => self.skipWaiting()));

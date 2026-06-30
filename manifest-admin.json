@@ -4,7 +4,7 @@
   "short_name": "Admin LBA",
   "description": "Espace administration — rendez-vous, clients, prestations, paiements.",
   "lang": "fr",
-  "start_url": "./admin.html",
+  "start_url": "./pilotage.html",
   "scope": "./",
   "display": "standalone",
   "orientation": "portrait",

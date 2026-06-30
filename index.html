@@ -672,7 +672,7 @@ function salon(){
      <div class="iline"><div class="ii">${ic('insta')}</div><div><div class="k">Instagram</div><div class="v">${esc(s.insta)}</div></div></div>
    </div>
    <div class="pad mt2"><button class="btn block lg" onclick="startBooking()">Réserver maintenant</button>
-     <button class="btn ghost block mt" onclick="location.href='admin.html'">Accès administrateur</button></div>
+     <button class="btn ghost block mt" onclick="location.href='pilotage.html'">Accès administrateur</button></div>
  </div>${tabbar('')}`;
  applyBg();
 }
@@ -989,7 +989,7 @@ function reportRdv(id){closeSheet();const ph=(DB.settings&&DB.settings.phone)||"
 async function cancelRdv(id){try{await apiAccount("cancel_booking",{booking_id:id});toast("Rendez-vous annulé","red");closeSheet();await refreshMe();account();}catch(e){toast(e.message||"Annulation impossible","red");}}
 
 /* ================= ADMIN ================= */
-function adminLogin(){ location.href='admin.html'; return;
+function adminLogin(){ location.href='pilotage.html'; return;
  app.innerHTML=`<div class="auth"><div class="center" style="margin-bottom:8px"><span class="disp" style="font-size:30px">ADMIN <span style="color:var(--rouge)">LBA</span></span></div>
   <p style="text-align:center;color:var(--muted);margin-bottom:18px">Tableau de bord de gestion.</p>
   <label class="f">Code administrateur</label><input class="in" id="acode" inputmode="numeric" value="0000">
