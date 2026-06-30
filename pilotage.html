@@ -75,6 +75,46 @@ textarea{min-height:74px;resize:vertical}
 .spin{display:inline-block;width:18px;height:18px;border:2px solid rgba(255,255,255,.4);border-top-color:#fff;border-radius:50%;animation:sp .7s linear infinite;vertical-align:-3px}
 @keyframes sp{to{transform:rotate(360deg)}}
 .pininput{letter-spacing:8px;text-align:center;font-size:22px;font-weight:700}
+/* ===== Refonte « wallet » — rouge/noir Locks ===== */
+#view{padding-bottom:104px}
+.topbar{position:sticky;top:0;z-index:20;background:linear-gradient(135deg,#16130F 0%,#2a1113 52%,#7a1620 100%);color:#fff;display:flex;align-items:center;justify-content:space-between;gap:10px;padding:16px;padding-top:max(16px,env(safe-area-inset-top));border-radius:0 0 24px 24px}
+.topbar .who{display:flex;align-items:center;gap:12px;min-width:0}
+.topbar .ava{width:42px;height:42px;border-radius:14px;background:rgba(255,255,255,.14);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:14px;letter-spacing:.5px;flex:0 0 auto}
+.topbar .hi{font-size:10.5px;letter-spacing:1.6px;text-transform:uppercase;opacity:.6;line-height:1}
+.topbar .hello{font-size:17px;font-weight:800;line-height:1.2;margin-top:2px}
+.topbar .trow{display:flex;gap:8px;flex:0 0 auto}
+.topbar .ic{background:rgba(255,255,255,.12);color:#fff;border:0;border-radius:12px;width:40px;height:40px;display:flex;align-items:center;justify-content:center;padding:0}
+.topbar .ic svg{width:19px;height:19px}
+.hero{background:linear-gradient(140deg,#1b1712 0%,#3a141a 50%,#9a1a26 100%);color:#fff;border-radius:24px;padding:20px;margin-bottom:14px;box-shadow:0 12px 26px -14px rgba(154,26,38,.55)}
+.hero .lab{font-size:11.5px;letter-spacing:1.2px;text-transform:uppercase;opacity:.72;text-align:center}
+.hero .amt{font-size:34px;font-weight:800;text-align:center;margin:5px 0 3px;letter-spacing:.4px}
+.hero .sub{font-size:12.5px;text-align:center;opacity:.82;margin-bottom:15px}
+.hero .hbtns{display:flex;gap:10px}
+.hero .hbtns button{flex:1;background:#fff;color:#16130F;border:0;border-radius:14px;padding:12px;font-size:14px;font-weight:700}
+.hero .hbtns button.alt{background:rgba(255,255,255,.15);color:#fff}
+.circles{display:flex;justify-content:space-between;gap:6px;margin-bottom:14px}
+.circles .c{flex:1;background:transparent;border:0;display:flex;flex-direction:column;align-items:center;gap:7px;cursor:pointer}
+.circles .c .ico{width:54px;height:54px;border-radius:50%;background:#fff;border:1px solid var(--line);display:flex;align-items:center;justify-content:center;box-shadow:0 2px 7px rgba(0,0,0,.05)}
+.circles .c .ico svg{width:22px;height:22px}
+.circles .c .lbl{font-size:11.5px;font-weight:600;color:var(--ink)}
+.circles .c:nth-child(1) .ico{color:var(--red)}
+.circles .c:nth-child(2) .ico{color:#1d8a4e}
+.circles .c:nth-child(3) .ico{color:#2563a8}
+.circles .c:nth-child(4) .ico{color:#b9821a}
+.bnav{position:fixed;left:50%;transform:translateX(-50%);bottom:max(14px,env(safe-area-inset-bottom));width:min(540px,calc(100% - 24px));background:#16130F;border-radius:24px;display:flex;align-items:center;justify-content:space-around;padding:9px 8px;z-index:30;box-shadow:0 14px 32px -10px rgba(0,0,0,.5)}
+.bnav button{background:transparent;border:0;color:rgba(255,255,255,.5);display:flex;flex-direction:column;align-items:center;gap:3px;font-size:10px;font-weight:600;padding:4px 4px;flex:1}
+.bnav button svg{width:21px;height:21px}
+.bnav button.on{color:#fff}
+.bnav button.ctr{flex:0 0 auto;gap:0}
+.bnav button.ctr .bi{width:56px;height:56px;border-radius:50%;background:var(--red);display:flex;align-items:center;justify-content:center;margin-top:-24px;border:4px solid var(--cream);box-shadow:0 8px 18px -4px rgba(216,30,44,.6)}
+.bnav button.ctr .bi svg{width:25px;height:25px;color:#fff}
+.bnav button.ctr.on .bi{background:var(--red2)}
+.morelist{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.moreit{background:#fff;border:1px solid var(--line);border-radius:14px;padding:16px 12px;font-size:14px;font-weight:600;color:var(--ink);text-align:left}
+@media(min-width:640px){
+  #app{max-width:600px}
+  .circles .c .ico{width:58px;height:58px}
+}
 </style>
 </head>
 <body>
@@ -142,6 +182,19 @@ function authScreen(msg,setup){
 
 function logout(){TOKEN="";localStorage.removeItem("lba_admin");boot()}
 
+/* ============== ICONS ============== */
+const _SVG='fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"';
+const IC={
+  refresh:`<svg viewBox="0 0 24 24" ${_SVG}><path d="M20 11a8 8 0 1 1-2.3-5.7"/><path d="M20 4v5h-5"/></svg>`,
+  exit:`<svg viewBox="0 0 24 24" ${_SVG}><path d="M15 4h3a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-3"/><path d="M10 8l-4 4 4 4"/><path d="M6 12h10"/></svg>`,
+  home:`<svg viewBox="0 0 24 24" ${_SVG}><path d="M3.5 10.5 12 3l8.5 7.5"/><path d="M5.5 9.5V21h5v-6h3v6h5V9.5"/></svg>`,
+  users:`<svg viewBox="0 0 24 24" ${_SVG}><circle cx="9" cy="8" r="3.2"/><path d="M3.5 20c0-3.3 2.5-5.5 5.5-5.5s5.5 2.2 5.5 5.5"/><path d="M16.5 6.3a3 3 0 0 1 0 5.4"/><path d="M21 20c0-2.5-1.5-4.4-3.6-5"/></svg>`,
+  cal:`<svg viewBox="0 0 24 24" ${_SVG}><rect x="3.5" y="4.5" width="17" height="16" rx="3"/><path d="M3.5 9.5h17"/><path d="M8 3v3M16 3v3"/></svg>`,
+  scissors:`<svg viewBox="0 0 24 24" ${_SVG}><circle cx="6" cy="6" r="2.4"/><circle cx="6" cy="18" r="2.4"/><path d="M8.2 7.6 20 18M8.2 16.4 20 6"/></svg>`,
+  tag:`<svg viewBox="0 0 24 24" ${_SVG}><path d="M20.5 13.4 12.6 21.3a1.5 1.5 0 0 1-2.1 0L3 13.8V5a2 2 0 0 1 2-2h8.8z"/><circle cx="8" cy="8" r="1.3"/></svg>`,
+  more:`<svg viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="1.7"/><circle cx="12" cy="12" r="1.7"/><circle cx="19" cy="12" r="1.7"/></svg>`
+};
+
 /* ============== SHELL ============== */
 async function loadDash(){
   DATA=await api("bootstrap");
@@ -151,16 +204,34 @@ async function loadDash(){
 const TABDEF=[["dash","Tableau"],["rdv","RDV"],["clients","Clients"],["presta","Prestations"],["dispo","Dispos"],["ferm","Fermetures"],["promo","Promos"],["fid","Fidélité"],["banner","Bannière"],["gal","Galerie"],["contenu","Contenu"],["apparence","Apparence"]];
 function renderShell(){
   app.innerHTML=`
-    <div class="bar"><div class="lg">Locks by Afro<small>Pilotage</small></div><div class="sp"></div><button onclick="loadDash()">↻</button><button onclick="logout()">Quitter</button></div>
-    <div class="tabs" id="tabs">${TABDEF.map(([k,l])=>`<button data-k="${k}" onclick="go('${k}')">${l}</button>`).join("")}</div>
-    <div id="view"></div>`;
+    <div class="topbar">
+      <div class="who"><div class="ava">LA</div><div><div class="hi">Pilotage</div><div class="hello">Locks by Afro</div></div></div>
+      <div class="trow">
+        <button class="ic" onclick="loadDash()" aria-label="Rafraîchir">${IC.refresh}</button>
+        <button class="ic" onclick="logout()" aria-label="Quitter">${IC.exit}</button>
+      </div>
+    </div>
+    <div id="view"></div>
+    <nav class="bnav">
+      <button data-k="dash" onclick="go('dash')">${IC.home}<span>Tableau</span></button>
+      <button data-k="clients" onclick="go('clients')">${IC.users}<span>Clients</span></button>
+      <button class="ctr" data-k="rdv" onclick="go('rdv')"><span class="bi">${IC.cal}</span></button>
+      <button data-k="presta" onclick="go('presta')">${IC.scissors}<span>Presta</span></button>
+      <button data-k="plus" onclick="moreSheet()">${IC.more}<span>Plus</span></button>
+    </nav>`;
+}
+function moreSheet(){
+  const items=[["dispo","Disponibilités"],["ferm","Fermetures"],["promo","Promos"],["fid","Fidélité"],["banner","Bannière"],["gal","Galerie"],["contenu","Contenu"],["apparence","Apparence"]];
+  sheet(`<div class="hd"><h3>Plus d'outils</h3><button class="x" onclick="closeSheet(this)">×</button></div>
+    <div class="morelist">${items.map(([k,l])=>`<button class="moreit" onclick="closeSheet(this);go('${k}')">${l}</button>`).join("")}</div>`);
 }
 function go(k){
   TAB=k;
-  document.querySelectorAll("#tabs button").forEach(b=>b.classList.toggle("on",b.dataset.k===k));
+  const main=["dash","rdv","clients","presta"];
+  document.querySelectorAll(".bnav button").forEach(b=>{const dk=b.dataset.k;b.classList.toggle("on",dk===k||(dk==="plus"&&!main.includes(k)))});
   const map={dash:vDash,rdv:vRdv,clients:vClients,presta:vPresta,dispo:vDispo,ferm:vFerm,promo:vPromo,fid:vFid,banner:vBanner,gal:vGal,contenu:vContenu,apparence:vApparence};
   (map[k]||vDash)();
-  const v=$("view");if(v)v.scrollIntoView({block:"start"});window.scrollTo(0,0);
+  window.scrollTo(0,0);
 }
 function setView(html){$("view").innerHTML=html}
 
@@ -183,12 +254,20 @@ function vDash(){
   const c=DATA.counts||{};
   const up=DATA.upcoming||[];
   setView(`
-    <h2>Tableau de bord</h2>
-    <div class="grid2">
-      <div class="kpi"><div class="n">${c.today||0}</div><div class="l">RDV aujourd'hui</div></div>
-      <div class="kpi"><div class="n">${c.upcoming||0}</div><div class="l">RDV à venir</div></div>
-      <div class="kpi"><div class="n">${c.clients||0}</div><div class="l">Clients</div></div>
-      <div class="kpi"><div class="n">${euro(c.ca_month_cents||0)}</div><div class="l">Encaissé ce mois</div></div>
+    <div class="hero">
+      <div class="lab">Encaissé ce mois</div>
+      <div class="amt">${euro(c.ca_month_cents||0)}</div>
+      <div class="sub">${c.today||0} RDV aujourd'hui · ${c.upcoming||0} à venir · ${c.clients||0} clients</div>
+      <div class="hbtns">
+        <button onclick="go('rdv')">Voir les RDV</button>
+        <button class="alt" onclick="go('clients')">Clients</button>
+      </div>
+    </div>
+    <div class="circles">
+      <button class="c" onclick="go('rdv')"><span class="ico">${IC.cal}</span><span class="lbl">RDV</span></button>
+      <button class="c" onclick="go('clients')"><span class="ico">${IC.users}</span><span class="lbl">Clients</span></button>
+      <button class="c" onclick="go('presta')"><span class="ico">${IC.scissors}</span><span class="lbl">Presta</span></button>
+      <button class="c" onclick="go('promo')"><span class="ico">${IC.tag}</span><span class="lbl">Promos</span></button>
     </div>
     <div class="card">
       <div class="between" style="margin-bottom:6px"><h3>Prochains rendez-vous</h3><button class="btn sm sec" onclick="go('rdv')">Tout voir</button></div>
@@ -322,10 +401,28 @@ async function cliSheet(id){
     <div class="card">
       <h3>Historique (${bks.length})</h3>
       <div class="list">${bks.length?bks.map(b=>`<div class="it"><div style="min-width:0"><div style="font-weight:600">${esc(b.service_name)}</div><div class="tag">${dt(b.start_at)} · ${euro(b.total_amount_cents)}</div></div>${statusPill(b.status)}</div>`).join(""):'<div class="muted">Aucun rendez-vous.</div>'}</div>
+    </div>
+    <div class="card">
+      <h3 style="color:var(--red)">Zone sensible</h3>
+      ${c.account_active?`<div style="margin-bottom:8px"><button class="btn sec" onclick="cliDeactivate('${c.id}')">Désactiver le compte</button></div><div class="tag" style="margin-bottom:10px">Bloque la connexion. RDV + fidélité conservés. Réversible.</div>`:""}
+      <button class="btn danger" onclick="cliPurge('${c.id}')">Supprimer définitivement</button>
+      <div class="tag" style="margin-top:6px">Efface le client, ses RDV, paiements et promos nominatives. Irréversible.</div>
     </div>`);
 }
 async function cliNote(id){
   try{await api("client_note",{id,notes:$("cnote").value});toast("Note enregistrée.")}catch(e){if(e.message!=="auth")toast(e.message)}
+}
+async function cliDeactivate(id){
+  const nm=(CLI[id]&&CLI[id].full_name)||"ce compte";
+  if(!confirm(`Désactiver le compte de ${nm} ?\n\nIl ne pourra plus se connecter. RDV et fidélité conservés. Réversible.`))return;
+  try{await api("client_delete",{id,mode:"deactivate"});document.querySelector(".sheet-bg")?.remove();toast("Compte désactivé.");loadClients(($("cq")&&$("cq").value.trim())||"")}
+  catch(e){if(e.message!=="auth")toast(e.message)}
+}
+async function cliPurge(id){
+  const nm=(CLI[id]&&CLI[id].full_name)||"ce client";
+  if(!confirm(`SUPPRIMER définitivement ${nm} ?\n\nSes rendez-vous, paiements et codes promo nominatifs seront effacés.\nAction irréversible.`))return;
+  try{await api("client_delete",{id,mode:"purge"});document.querySelector(".sheet-bg")?.remove();toast("Client supprimé.");loadClients(($("cq")&&$("cq").value.trim())||"")}
+  catch(e){if(e.message!=="auth")toast(e.message)}
 }
 
 /* ============== PRESTATIONS ============== */
@@ -461,6 +558,13 @@ function vFerm(){
       <div style="margin-top:12px"><button class="btn" onclick="fermAdd()">Bloquer cette journée</button></div>
     </div>
     <div class="card">
+      <h3>Bloquer une plage (congés)</h3>
+      <label>Du</label><input id="f_start" type="date">
+      <label>Au</label><input id="f_end" type="date">
+      <label>Motif (optionnel)</label><input id="f_reason2" placeholder="ex. Congés">
+      <div style="margin-top:12px"><button class="btn" onclick="fermAddRange()">Bloquer la plage</button></div>
+    </div>
+    <div class="card">
       <h3>Journées fermées (${cl.length})</h3>
       <div class="list" id="flist">${cl.length?cl.map(fermRow).join(""):'<div class="muted">Aucune fermeture.</div>'}</div>
     </div>`);
@@ -471,6 +575,12 @@ function fermRow(c){
 async function fermAdd(){
   const date=$("f_date").value;if(!date){toast("Choisis une date.");return}
   try{await api("closure_add",{date,reason:$("f_reason").value.trim()||null});const j=await api("closures");DATA.closures=j.closures||[];go("ferm");toast("Journée bloquée.")}
+  catch(e){if(e.message!=="auth")toast(e.message)}
+}
+async function fermAddRange(){
+  const start=$("f_start").value,end=$("f_end").value;
+  if(!start||!end){toast("Choisis les deux dates.");return}
+  try{const j=await api("closure_add_range",{start,end,reason:$("f_reason2").value.trim()||null});const k=await api("closures");DATA.closures=k.closures||[];go("ferm");toast((j.count||0)+" journée(s) bloquée(s).")}
   catch(e){if(e.message!=="auth")toast(e.message)}
 }
 async function fermDel(date){
