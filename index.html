@@ -345,17 +345,21 @@ table.tbl tr:last-child td{border:0}
 .circ:nth-child(2) .ci{color:var(--orange)}
 .circ:nth-child(4) .ci{color:var(--ok)}
 .circ:nth-child(5) .ci{color:#C0922F}
+.dsec{margin-top:14px}
+.dsec-t{font-size:12.5px;font-weight:700;color:var(--rouge);text-transform:uppercase;letter-spacing:.04em;margin:0 0 8px}
+.dayrow{display:flex;gap:8px;overflow-x:auto;padding:2px 0 4px}
+.dayrow::-webkit-scrollbar{display:none}
+.daychip{flex:0 0 auto;min-width:62px;text-align:center;padding:10px 8px;border:1px solid var(--line);border-radius:14px;background:var(--white);cursor:pointer;line-height:1.25}
+.daychip b{display:block;font-size:12.5px}
+.daychip span{font-size:11px;color:var(--muted)}
+.daychip.sel{border-color:var(--rouge);background:var(--rouge);color:#fff}
+.daychip.sel span{color:rgba(255,255,255,.85)}
 </style>
 </head>
 <body>
 <div id="app"></div>
 <div id="toast"></div>
 <div class="overlay" id="overlay"><div class="sheet" id="sheet"></div></div>
-<div class="demobar" id="demobar">
-  <span><b>DÉMO v2</b> · code magique <b>1234</b> · admin <b>0000</b></span>
-  <button onclick="document.getElementById('demobar').style.display='none'">×</button>
-</div>
-
 <script>
 /* ================= ICONS (SVG inline, Lucide-like) ================= */
 const P={
@@ -522,20 +526,9 @@ function home(){
  </div>
  <div class="scroll">
    <div class="pad" style="padding-top:14px"><div class="wcard">${hero}</div></div>
-
-   <div class="circ5">
-     <button class="circ" onclick="go('${c?'/espace':'/login'}')"><span class="ci">${ic('cal')}</span><span class="cl">Mes RDV</span></button>
-     <button class="circ" onclick="startBooking(true)"><span class="ci">${ic('chat')}</span><span class="cl">Diagnostic</span></button>
-     <button class="circ mid" onclick="startBooking()"><span class="ci">${ic('calplus')}</span><span class="cl">Réserver</span></button>
-     <button class="circ" onclick="go('/galerie')"><span class="ci">${ic('image')}</span><span class="cl">Galerie</span></button>
-     <button class="circ" onclick="go('${c?'/espace':'/login'}')"><span class="ci">${ic('gift')}</span><span class="cl">Fidélité</span></button>
-   </div>
-
-   <div class="searchbar" onclick="go('/prestations')">${ic('search')}<input placeholder="Rechercher une prestation…" readonly></div>
-
-   ${pr.active?`<div class="promo" onclick="go('/prestations')">
+${pr.active?`<div class="promo" onclick="go('/prestations')">
      <span class="tag">${esc(pr.label)}</span>
-     <h3><span class="pct">-${pr.percent}%</span> ${esc(pr.text)}</h3>
+     <h3><span class="pct">-${pr.percent}%</span> ${esc(pr.text||'sur votre prestation')}</h3>
      <p>Profitez-en lors de votre réservation.</p>
      <button class="btn light sm">J'en profite</button></div>`:''}
 
@@ -652,67 +645,154 @@ function salon(){
 }
 
 /* ================= BOOKING ================= */
+const SLOTS_URL="https://gnbpaytmhigbbnijovlg.supabase.co/functions/v1/slots";
+const CHECKOUT_URL="https://gnbpaytmhigbbnijovlg.supabase.co/functions/v1/create-sumup-checkout";
+// Fallback minimal si site-data indisponible : au moins les coordonnées requises
+const FALLBACK_DIAG=[
+ {section:"Vos informations",q_key:"prenom",label:"Prénom",field_type:"text",required:true},
+ {section:"Vos informations",q_key:"nom",label:"Nom",field_type:"text",required:true},
+ {section:"Vos informations",q_key:"tel",label:"Téléphone",field_type:"tel",required:true},
+ {section:"Vos informations",q_key:"email",label:"E-mail",field_type:"email",required:true}
+];
+const diagQuestions=()=> (DB._diag&&DB._diag.length)?DB._diag:FALLBACK_DIAG;
+
 function startBooking(diagFirst=false,sid=null){
- bk={step:0,account:null,diagType:null,diag:{},sid:sid,date:null,client:{},done:false};
- if(DB.session){bk.account="in";bk.client=DB.session;bookingStep(1);}else bookingStep(0);
+ bk={step:0,account:null,diag:{},sid:sid,slotIso:null,slotLabel:null,days:null,dayIdx:0,loadingSlots:false,slotsErr:null,paying:false};
+ if(DB.session){
+  bk.account="in";const s=DB.session;
+  bk.diag.prenom=s.prenom||(s.full_name?s.full_name.split(" ")[0]:"")||"";
+  bk.diag.nom=s.nom||(s.full_name?s.full_name.split(" ").slice(1).join(" "):"")||"";
+  bk.diag.tel=s.tel||s.phone||"";bk.diag.email=s.email||"";
+  bookingStep(1);
+ } else bookingStep(0);
 }
+
+function setDiag(k,val,re){bk.diag[k]=val;if(re)bookingStep(1);}
+function toggleDiag(k,opt){const a=Array.isArray(bk.diag[k])?bk.diag[k]:[];const i=a.indexOf(opt);if(i>=0)a.splice(i,1);else a.push(opt);bk.diag[k]=a;bookingStep(1);}
+function qVisible(q){if(!q.conditional_on)return true;const dep=bk.diag[q.conditional_on];return Array.isArray(dep)?dep.includes(q.conditional_value):dep===q.conditional_value;}
+function diagValid(){
+ const ok=diagQuestions().filter(q=>q.required&&qVisible(q)).every(q=>{const v=bk.diag[q.q_key];return Array.isArray(v)?v.length>0:(v!=null&&String(v).trim()!=="");});
+ return ok&&/.+@.+\..+/.test(bk.diag.email||"");
+}
+function diagField(q){
+ const v=bk.diag[q.q_key];
+ const lab=`<label class="f">${esc(q.label)}${q.required?' <span class="req">*</span>':''}</label>`;
+ if(q.field_type==="boolean")return lab+`<div class="opts" style="grid-template-columns:1fr 1fr">
+   <div class="opt ${v==='Oui'?'sel':''}" onclick="setDiag('${q.q_key}','Oui',true)" style="padding:11px 13px"><div class="rd"></div>Oui</div>
+   <div class="opt ${v==='Non'?'sel':''}" onclick="setDiag('${q.q_key}','Non',true)" style="padding:11px 13px"><div class="rd"></div>Non</div></div>`;
+ if(q.field_type==="checkboxes"){const arr=Array.isArray(v)?v:[];
+  return lab+`<div class="opts">${(q.options||[]).map(o=>`<div class="opt ${arr.includes(o)?'sel':''}" onclick="toggleDiag('${q.q_key}','${esc(o)}')" style="padding:11px 13px"><div class="rd"></div>${esc(o)}</div>`).join("")}</div>`;}
+ if(q.field_type==="textarea")return lab+`<textarea class="in" rows="3" style="resize:vertical;font-family:inherit" oninput="bk.diag['${q.q_key}']=this.value">${esc(v||"")}</textarea>`;
+ const im=q.field_type==="number"?"numeric":q.field_type==="tel"?"tel":q.field_type==="email"?"email":"text";
+ return lab+`<input class="in" inputmode="${im}" value="${esc(v||"")}" oninput="bk.diag['${q.q_key}']=this.value">`;
+}
+const priceLine=s=> s.type==='horaire'?money(s.price)+'/h':(s.type==='devis'?'dès '+money(s.price):money(s.price));
+
 function bookingStep(step){
  bk.step=step;const steps=5;let body="";
  if(step===0){
   body=`<p class="dmut" style="color:var(--muted);margin-bottom:14px">Besoin juste d'un rendez-vous ? Continuez sans inscription, vous pourrez créer votre compte à la fin.</p>
    <div class="opts">
     <div class="opt" onclick="bk.account='in';go('/login');closeSheet()"><div class="rd"></div><div><b>J'ai déjà un compte</b><div class="hint">Connectez-vous pour retrouver vos RDV et votre fidélité.</div></div></div>
-    <div class="opt" onclick="bk.account='guest';bookingStep(1)"><div class="rd"></div><div><b>Continuer sans inscription</b><div class="hint">Mini-diagnostic puis prise de RDV directe.</div></div></div>
+    <div class="opt" onclick="bk.account='guest';bookingStep(1)"><div class="rd"></div><div><b>Continuer sans inscription</b><div class="hint">Diagnostic puis prise de RDV directe.</div></div></div>
    </div>`;
  } else if(step===1){
-  body=`<p class="stitle">Mini-diagnostic</p><p style="color:var(--muted);font-size:13.5px;margin-bottom:12px">Choisissez la version courte ou complète.</p>
-   <div class="opts" style="grid-template-columns:1fr 1fr">
-    <div class="opt ${bk.diagType==='short'?'sel':''}" onclick="bk.diagType='short';bk.diag={};bookingStep(1)"><div class="rd"></div>Courte</div>
-    <div class="opt ${bk.diagType==='full'?'sel':''}" onclick="bk.diagType='full';bk.diag={};bookingStep(1)"><div class="rd"></div>Complète</div></div>`;
-  if(bk.diagType){const qs=bk.diagType==='short'?DB.diagShort:DB.diagFull;
-   body+=`<div class="mt2">`+qs.map((q,i)=>`<label class="f">${esc(q.q)}</label><div class="opts">${q.o.map(o=>`<div class="opt ${bk.diag[i]===o?'sel':''}" onclick="bk.diag[${i}]='${esc(o)}';bookingStep(1)" style="padding:11px 13px">${esc(o)}</div>`).join("")}</div>`).join("")+`</div>`;
-   const ok=qs.every((_,i)=>bk.diag[i]);body+=`<button class="btn block mt2" ${ok?"":"disabled"} onclick="bookingStep(2)">Continuer</button>`;}
+  const qs=diagQuestions();const secs=[];let cur=null;
+  qs.forEach(q=>{if(!qVisible(q))return;if(q.section!==cur){cur=q.section;secs.push({s:cur,items:[]});}secs[secs.length-1].items.push(q);});
+  body=`<p class="stitle">Diagnostic</p><p style="color:var(--muted);font-size:13.5px;margin-bottom:10px">Ces informations préparent votre rendez-vous.</p>`;
+  body+=secs.map(g=>`<div class="dsec"><h4 class="dsec-t">${esc(g.s)}</h4>${g.items.map(diagField).join("")}</div>`).join("");
+  body+=`<button class="btn block mt2" ${diagValid()?"":"disabled"} onclick="bookingStep(2)">Continuer</button>`;
  } else if(step===2){
-  if(bk.account==="in"&&DB.session){bk.client=DB.session;return bookingStep(3);}
-  const c=bk.client;
-  body=`<p class="stitle">Vos informations</p><p style="color:var(--muted);font-size:13.5px;margin-bottom:4px">Champs obligatoires pour créer votre fiche.</p>
-   <div class="grid2"><div><label class="f">Prénom <span class="req">*</span></label><input class="in" id="fp" value="${esc(c.prenom||'')}"></div>
-   <div><label class="f">Nom <span class="req">*</span></label><input class="in" id="fn" value="${esc(c.nom||'')}"></div></div>
-   <label class="f">Téléphone <span class="req">*</span></label><input class="in" id="ft" inputmode="tel" value="${esc(c.tel||'')}">
-   <label class="f">Adresse <span class="req">*</span></label><input class="in" id="fa" value="${esc(c.adresse||'')}">
-   <label class="f">Email <span class="req">*</span></label><input class="in" id="fe" inputmode="email" value="${esc(c.email||'')}">
-   <button class="btn block mt2" onclick="saveFiche()">Continuer</button>`;
+  body=`<p class="stitle">Choisissez votre prestation</p><div class="opts">${DB.services.map(s=>`<div class="opt ${bk.sid===s.id?'sel':''}" onclick="bk.sid='${s.id}';bk.slotIso=null;bk.slotLabel=null;bk.days=null;bookingStep(2)"><div class="rd"></div><div style="flex:1"><b>${esc(s.name)}</b><div class="hint">${priceLine(s)}${s.diag?' · diagnostic':''}</div></div></div>`).join("")}</div>
+   <button class="btn block mt2" ${bk.sid?"":"disabled"} onclick="bookingStep(3)">Choisir le créneau</button>`;
  } else if(step===3){
-  body=`<p class="stitle">Choisissez votre prestation</p><div class="opts">${DB.services.map(s=>`<div class="opt ${bk.sid===s.id?'sel':''}" onclick="bk.sid='${s.id}';bookingStep(3)"><div class="rd"></div><div style="flex:1"><b>${esc(s.name)}</b><div class="hint">${s.type==='fixe'?money(s.price):s.type==='horaire'?money(s.price)+'/h':'sur devis dès '+money(s.price)}${s.diag?' · diagnostic':''}</div></div></div>`).join("")}</div>
-   <button class="btn block mt2" ${bk.sid?"":"disabled"} onclick="bookingStep(4)">Choisir le créneau</button>`;
- } else if(step===4){
-  const s=svc(bk.sid),days=["Mar 1","Mer 2","Jeu 3","Ven 4","Sam 5","Mar 8","Mer 9","Jeu 10"];
-  body=`<p class="stitle">Créneau</p><div class="opts" style="grid-template-columns:1fr 1fr">${days.map(d=>`<div class="opt ${bk.date===d?'sel':''}" onclick="bk.date='${d}';bookingStep(4)" style="padding:11px 13px">${d} · 14h00</div>`).join("")}</div>
-   <div class="card mt2" style="background:var(--cream2)"><div class="flexb"><span style="color:var(--muted)">Prestation</span><b>${esc(s.name)}</b></div>
-   <div class="flexb mt"><span style="color:var(--muted)">Tarif</span><b>${s.type==='devis'?'dès '+money(s.price):s.type==='horaire'?money(s.price)+'/h':money(s.price)}</b></div>
+  const s=svc(bk.sid);
+  body=`<p class="stitle">Créneau</p>`;
+  if(bk.loadingSlots) body+=`<p class="hint center" style="padding:18px 0">Chargement des créneaux…</p>`;
+  else if(bk.slotsErr) body+=`<div class="card" style="background:var(--cream2)"><p style="color:var(--muted)">${esc(bk.slotsErr)}</p><button class="btn light sm mt" onclick="loadSlots()">Réessayer</button></div>`;
+  else if(bk.days){
+   if(!bk.days.length) body+=`<p class="hint center" style="padding:18px 0">Aucun créneau disponible pour le moment.<br>Contactez le salon directement.</p>`;
+   else{
+    const di=bk.dayIdx!=null?bk.dayIdx:0;
+    body+=`<div class="dayrow">${bk.days.map((d,i)=>`<div class="daychip ${i===di?'sel':''}" onclick="bk.dayIdx=${i};bk.slotIso=null;bk.slotLabel=null;bookingStep(3)"><b>${d.wd} ${d.dnum}</b><span>${d.month}</span></div>`).join("")}</div>`;
+    const day=bk.days[di];
+    body+=`<div class="opts mt" style="grid-template-columns:repeat(3,1fr)">${day.slots.map(sl=>`<div class="opt ${bk.slotIso===sl.iso?'sel':''}" onclick="bk.slotIso='${sl.iso}';bk.slotLabel='${day.wd} ${day.dnum} ${day.month} · ${sl.t}';bookingStep(3)" style="padding:11px 4px;justify-content:center">${sl.t}</div>`).join("")}</div>`;
+   }
+  }
+  body+=`<div class="card mt2" style="background:var(--cream2)"><div class="flexb"><span style="color:var(--muted)">Prestation</span><b>${esc(s.name)}</b></div>
+   <div class="flexb mt"><span style="color:var(--muted)">Tarif</span><b>${priceLine(s)}</b></div>
    <div class="flexb mt"><span style="color:var(--muted)">Acompte</span><b style="color:var(--rouge)">${money(s.deposit)}</b></div>
+   ${bk.slotLabel?`<div class="flexb mt"><span style="color:var(--muted)">Créneau</span><b>${esc(bk.slotLabel)}</b></div>`:""}
    <div class="hint mt">Le solde se règle sur place. L'acompte remplit votre carte de fidélité.</div></div>
-   <button class="btn block mt2" ${bk.date?"":"disabled"} onclick="payDeposit()">Payer l'acompte ${money(s.deposit)}</button>
-   <p class="hint center mt">Paiement simulé (SumUp en production)</p>`;
+   <button class="btn block mt2" ${bk.slotIso?"":"disabled"} onclick="bookingStep(4)">Continuer</button>`;
+  if(!bk.days&&!bk.loadingSlots&&!bk.slotsErr) setTimeout(loadSlots,30);
+ } else if(step===4){
+  const s=svc(bk.sid);const solde=Math.max(0,(s.price||0)-(s.deposit||0));
+  body=`<p class="stitle">Récapitulatif</p>
+   <div class="card" style="background:var(--cream2)">
+    <div class="flexb"><span style="color:var(--muted)">Prestation</span><b>${esc(s.name)}</b></div>
+    <div class="flexb mt"><span style="color:var(--muted)">Créneau</span><b>${esc(bk.slotLabel||"")}</b></div>
+    <div class="flexb mt"><span style="color:var(--muted)">Au nom de</span><b>${esc(((bk.diag.prenom||"")+" "+(bk.diag.nom||"")).trim())}</b></div>
+    <div class="flexb mt"><span style="color:var(--muted)">Acompte à régler</span><b style="color:var(--rouge)">${money(s.deposit)}</b></div>
+    <div class="flexb mt"><span style="color:var(--muted)">Solde sur place</span><b>${money(solde)}</b></div>
+   </div>
+   <button class="btn block mt2" ${bk.paying?"disabled":""} onclick="payDeposit()">${bk.paying?"Redirection…":(s.deposit>0?`Payer l'acompte ${money(s.deposit)}`:"Confirmer le rendez-vous")}</button>
+   <p class="hint center mt">${s.deposit>0?"Paiement sécurisé par SumUp. Vous serez redirigé.":"Aucun acompte requis pour cette prestation."}</p>`;
  }
  const prog=`<div class="prog">${Array.from({length:steps}).map((_,i)=>`<i class="${i<=step?'on':''}"></i>`).join("")}</div>`;
  const minStep=DB.session?1:0;
  openSheet(`<div class="sheet-h"><h3>Réserver</h3><button class="xbtn" onclick="closeSheet()">${ic('x')}</button></div>${step>0?prog:""}<div class="sheet-b">${step>minStep?`<button class="backlink" onclick="bookingStep(${step-1})">${ic('chevl')} Retour</button>`:""}${body}</div>`);
 }
-function saveFiche(){const v=id=>($("#"+id).value||"").trim();const c={prenom:v("fp"),nom:v("fn"),tel:v("ft"),adresse:v("fa"),email:v("fe")};if(Object.values(c).some(x=>!x)){toast("Tous les champs sont obligatoires","red");return;}bk.client=c;bookingStep(3);}
-function payDeposit(){
- const s=svc(bk.sid);let cl;
- if(bk.account==="in"&&DB.session)cl=DB.session;else{cl=DB.clients.find(x=>x.email.toLowerCase()===(bk.client.email||"").toLowerCase());if(!cl){cl={id:"c"+(DB.clients.length+1),...bk.client,stamps:0,bookings:[],codes:[]};DB.clients.push(cl);}}
- cl.bookings.unshift({id:"b"+Date.now(),sid:s.id,date:"2026-07-"+(bk.date.match(/\d+/)||[20])[0],status:"up",deposit:s.deposit,total:s.type==='fixe'?s.price:s.deposit});
- cl.stamps=Math.min(DB.loyalty.threshold,cl.stamps+1);bk.client=cl;
- const left=DB.loyalty.threshold-cl.stamps;
+
+async function loadSlots(){
+ bk.loadingSlots=true;bk.slotsErr=null;bookingStep(3);
+ try{
+  const r=await fetch(`${SLOTS_URL}?service_id=${encodeURIComponent(bk.sid)}&days=21`);
+  if(!r.ok)throw new Error('HTTP '+r.status);
+  const d=await r.json();
+  bk.days=d.days||[];bk.dayIdx=0;bk.loadingSlots=false;bookingStep(3);
+ }catch(e){bk.loadingSlots=false;bk.slotsErr="Créneaux indisponibles pour le moment.";bookingStep(3);}
+}
+
+async function payDeposit(){
+ if(bk.paying)return;
+ if(!bk.slotIso){toast("Choisissez un créneau","red");return bookingStep(3);}
+ if(!diagValid()){toast("Complétez vos informations","red");return bookingStep(1);}
+ bk.paying=true;bookingStep(4);
+ try{
+  const payload={diagnostic:{...bk.diag},service_id:bk.sid,start_at:bk.slotIso};
+  const r=await fetch(CHECKOUT_URL,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(payload)});
+  const d=await r.json();
+  if(!r.ok){bk.paying=false;toast(d.error||"Erreur lors de la réservation","red");return bookingStep(4);}
+  if(d.hosted_checkout_url){window.location.href=d.hosted_checkout_url;return;}
+  if(d.no_payment){bookingDone(d.booking_id);return;}
+  bk.paying=false;toast("Réponse inattendue du serveur","red");bookingStep(4);
+ }catch(e){bk.paying=false;toast("Connexion impossible. Réessayez.","red");bookingStep(4);}
+}
+
+function bookingDone(bid){
+ const s=svc(bk.sid);
  openSheet(`<div class="sheet-h"><h3>Confirmé</h3><button class="xbtn" onclick="closeSheet()">${ic('x')}</button></div>
   <div class="sheet-b center">
    <div style="width:72px;height:72px;border-radius:50%;background:var(--ok);color:#fff;display:grid;place-items:center;margin:6px auto 14px">${ic('check')}</div>
    <h3 style="font-size:23px">Rendez-vous confirmé</h3>
-   <p style="color:var(--muted);margin-top:8px">${esc(s.name)} · ${esc(bk.date)} · 14h00<br>Acompte de ${money(s.deposit)} réglé.</p>
-   <div class="card mt2" style="background:var(--cream2);text-align:left"><b>+1 tampon de fidélité</b><p style="color:var(--muted);font-size:13.5px;margin-top:4px">${cl.stamps}/${DB.loyalty.threshold} tampons. ${left>0?`Plus que ${left} avant <b>${esc(DB.loyalty.reward)}</b>.`:`Récompense débloquée : <b>${esc(DB.loyalty.reward)}</b> !`}</p></div>
-   ${bk.account!=="in"?`<div class="perks mt2" style="text-align:left"><b>Créez votre compte en 1 minute</b><p style="color:var(--ink2);font-size:13px;margin-bottom:8px">Retrouvez vos RDV, votre fidélité et recevez des codes de réduction.</p><button class="btn block" onclick="DB.session=bk.client;closeSheet();go('/espace')">Activer mon compte</button></div>`:`<button class="btn block mt2" onclick="closeSheet();go('/espace')">Voir mon espace</button>`}
+   <p style="color:var(--muted);margin-top:8px">${esc(s?s.name:'Prestation')} · ${esc(bk.slotLabel||"")}<br>Un e-mail de confirmation vous a été envoyé.</p>
+   <button class="btn block mt2" onclick="closeSheet();go('/espace')">Voir mon espace</button>
+   <button class="linkbtn mt2" onclick="closeSheet();go('/')">Retour à l'accueil</button>
+  </div>`);
+}
+
+// Retour depuis SumUp : index.html?paid=1&ref=<booking>
+function checkPaymentReturn(){
+ const p=new URLSearchParams(location.search);
+ if(p.get("paid")!=="1")return;
+ history.replaceState(null,"",location.pathname+location.hash);
+ openSheet(`<div class="sheet-h"><h3>Paiement reçu</h3><button class="xbtn" onclick="closeSheet()">${ic('x')}</button></div>
+  <div class="sheet-b center">
+   <div style="width:72px;height:72px;border-radius:50%;background:var(--ok);color:#fff;display:grid;place-items:center;margin:6px auto 14px">${ic('check')}</div>
+   <h3 style="font-size:23px">Rendez-vous confirmé</h3>
+   <p style="color:var(--muted);margin-top:8px">Votre acompte a bien été reçu.<br>Un e-mail de confirmation vous a été envoyé.</p>
+   <button class="btn block mt2" onclick="closeSheet();go('/espace')">Voir mon espace</button>
    <button class="linkbtn mt2" onclick="closeSheet();go('/')">Retour à l'accueil</button>
   </div>`);
 }
@@ -871,7 +951,23 @@ function aFond(){$("#abody").innerHTML=`<p style="color:var(--muted);margin-bott
 function setBg(k){DB.settings.bg=k;applyBg();toast("Fond mis à jour","ok");aFond();}
 
 /* ================= INIT ================= */
-router();
+const SITE_DATA_URL="https://gnbpaytmhigbbnijovlg.supabase.co/functions/v1/site-data";
+async function loadSiteData(){
+  try{
+    const r=await fetch(SITE_DATA_URL);
+    if(!r.ok) throw new Error('HTTP '+r.status);
+    const d=await r.json();
+    if(!d||!Array.isArray(d.services)) throw new Error('payload invalide');
+    DB.services=d.services.map(s=>({...s,long:s.long||s.desc||''}));
+    if(d.settings) Object.assign(DB.settings,d.settings);
+    if(d.promo) DB.promo=d.promo;
+    if(d.loyalty) DB.loyalty=d.loyalty;
+    if(Array.isArray(d.gallery)) DB.gallery=d.gallery;
+    DB._diag=d.diagnostic||[]; DB._avail=d.availability||[];
+    if('popular' in DB) DB.popular=d.services.slice(0,4).map(s=>s.id);
+  }catch(e){ console.warn('[site-data] hors-ligne, fallback demo:',e&&e.message); }
+}
+loadSiteData().then(()=>{router();checkPaymentReturn();});
 </script>
 <script>
 /* === Accès pilotage caché : 3 clics rapides sur le logo → code → pilotage.html ===
